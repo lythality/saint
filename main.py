@@ -3,19 +3,50 @@ import clang.cindex
 
 import re
 
-constants = []
+int_constants = []
+
+def getTokenString(n):
+    ret = ""
+    for token in n.get_tokens():
+        ret += token.spelling
+    return ret
+
+def isConstCharType(n):
+    typename = n.type.spelling
+    return "const" in typename and "char" in typename and \
+        ("*" in typename or "[" in typename)
+
+def hasConstCharTypeConstants(n):
+    if n.kind.name == "STRING_LITERAL":
+        return True
+    for c in n.get_children():
+        if hasConstCharTypeConstants(c):
+            return True
+    return False
+
+def is_assignment(n):
+    return "=" in getTokenString(n)
 
 def traverse(n, i=0):
-    global constants
+    global int_constants
 
     print(' ' * i, end="")
     print(n.kind, end="")
     print(" : ", end="")
-    print(n.spelling, end="")
+    print(n.type.spelling, end="")
+    print(" :: ", end="")
+    print(getTokenString(n), end="")
+    print(dir(n.kind), end="")
     print("")
 
     if n.kind == clang.cindex.CursorKind.INTEGER_LITERAL:
-        constants.append(n)
+        int_constants.append(n)
+
+    if n.kind.is_expression():
+        if is_assignment(n):
+            if not isConstCharType(n):
+                if hasConstCharTypeConstants(n):
+                    print(" > const char is assigned on non const char type")
 
     for c in n.get_children():
         traverse(c, i=i+1)
@@ -39,7 +70,7 @@ if __name__ == '__main__':
     traverse(translation_unit.cursor)
 
     print("=== CONSTANTS ===")
-    for c in constants:
+    for c in int_constants:
         print(c.kind, end=" : ")
         print(c.spelling or c.displayname, end=" :: ")
         text = ""
