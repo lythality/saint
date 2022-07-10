@@ -24,6 +24,9 @@ def traverse(n, i=0):
 def isOctet(text: str) -> bool:
     return re.match(r"^0[0-7]+$", text)
 
+def isLowerLongCharUsed(text: str) -> bool:
+    return "l" in text
+
 
 # 스크립트를 실행하려면 여백의 녹색 버튼을 누릅니다.
 if __name__ == '__main__':
@@ -45,4 +48,6 @@ if __name__ == '__main__':
             text = text + t.spelling
         print(c.type.spelling, end=" - ")
         print(c.kind.name, end="")
-        print(" > OCTET IS USED" if isOctet(text) else "")
+        print(" > OCTET IS USED" if isOctet(text) else "", end="")
+        print(" > LOWER LONG IS USED" if isLowerLongCharUsed(text) else "", end="")
+        print()
