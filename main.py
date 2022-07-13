@@ -5,6 +5,8 @@ import re
 
 int_constants = []
 
+ARCHITECTURE_BITS = 16
+
 def getTokenString(n):
     ret = ""
     for token in n.get_tokens():
@@ -26,6 +28,13 @@ def hasConstCharTypeConstants(n):
 
 def is_assignment(n):
     return "=" in getTokenString(n)
+
+def is_non_obvious_sign(name):
+    global ARCHITECTURE_BITS
+    try:
+        return int(name, 0) > 2 ** (ARCHITECTURE_BITS - 1) - 1
+    except ValueError:
+        pass
 
 def traverse(n, i=0):
     global int_constants
@@ -81,4 +90,5 @@ if __name__ == '__main__':
         print(c.kind.name, end="")
         print(" > OCTET IS USED" if isOctet(text) else "", end="")
         print(" > LOWER LONG IS USED" if isLowerLongCharUsed(text) else "", end="")
+        print(" > non-obvious signed int is used" if is_non_obvious_sign(text) else "", end="")
         print()
