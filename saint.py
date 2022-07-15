@@ -54,6 +54,8 @@ def print_info(n, tab: int):
     print(" : ", end="")
     print(n.type.spelling, end="")
     print(" :: ", end="")
+    print(n.spelling, end="")
+    print(" :: ", end="")
     print(getTokenString(n), end="")
     print("")
 
@@ -74,8 +76,24 @@ def hook_expression(n: clang.cindex.CursorKind):
                 print(" > const char is assigned on non const char type")
 
 
+def collect_decl_var_names(n, names):
+    if n.kind == clang.cindex.CursorKind.VAR_DECL:
+        names.append(n.spelling)
+
+    # iterate recursively
+    for c in n.get_children():
+        if c.kind == clang.cindex.CursorKind.COMPOUND_STMT:
+            continue
+        collect_decl_var_names(c, names)
+
+
 def traverse(n, i=0):
     print_info(n, i)
+
+    if n.kind == clang.cindex.CursorKind.COMPOUND_STMT:
+        names = []
+        collect_decl_var_names(n, names)
+        print(names)
 
     if n.kind == clang.cindex.CursorKind.INTEGER_LITERAL:
         hook_integer_literal(n)
