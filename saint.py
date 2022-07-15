@@ -55,7 +55,6 @@ def print_info(n, tab: int):
     print(n.type.spelling, end="")
     print(" :: ", end="")
     print(getTokenString(n), end="")
-    print(dir(n.kind), end="")
     print("")
 
 
