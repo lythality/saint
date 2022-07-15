@@ -87,13 +87,26 @@ def collect_decl_var_names(n, names):
         collect_decl_var_names(c, names)
 
 
+var_names_scope = []
+
+
 def traverse(n, i=0):
+    global var_names_scope
     print_info(n, i)
 
+    var_names_inside_comp_stmt = []
     if n.kind == clang.cindex.CursorKind.COMPOUND_STMT:
-        names = []
-        collect_decl_var_names(n, names)
-        print(names)
+        collect_decl_var_names(n, var_names_inside_comp_stmt)
+        # check intersection
+        intersection = list(set(var_names_scope) & set(var_names_inside_comp_stmt))
+        if intersection:
+            print(" > same var name is used in inner scope")
+            var_names_inside_comp_stmt = list(set(var_names_inside_comp_stmt) - set(intersection))
+        var_names_scope.extend(var_names_inside_comp_stmt)
+
+    if n.kind == clang.cindex.CursorKind.COMPOUND_STMT:
+        collect_decl_var_names(n, var_names_inside_comp_stmt)
+        var_names_scope.extend(var_names_inside_comp_stmt)
 
     if n.kind == clang.cindex.CursorKind.INTEGER_LITERAL:
         hook_integer_literal(n)
@@ -104,6 +117,9 @@ def traverse(n, i=0):
     # iterate recursively
     for c in n.get_children():
         traverse(c, i+1)
+
+    if n.kind == clang.cindex.CursorKind.COMPOUND_STMT:
+        var_names_scope = list(set(var_names_scope) - set(var_names_inside_comp_stmt))
 
 
 def start_saint(srcfile: str):
