@@ -158,6 +158,32 @@ def traverse(n, i=0):
     if n.kind == clang.cindex.CursorKind.COMPOUND_STMT:
         var_names_scope = list(set(var_names_scope) - set(var_names_inside_comp_stmt))
 
+    post_visit(n)
+
+
+names_typedef = []
+names_vars = []
+
+
+def post_visit(n):
+    global names_typedef
+    global names_vars
+    if n.kind == clang.cindex.CursorKind.TYPEDEF_DECL:
+        names_typedef.append(n.type.spelling)
+    elif n.kind == clang.cindex.CursorKind.VAR_DECL \
+            or n.kind == clang.cindex.CursorKind.FIELD_DECL :
+        names_vars.append(n.spelling)
+
+
+def post_check():
+    global names_typedef
+    global names_vars
+    print(names_typedef)
+    print(names_vars)
+
+    for v in list(set(names_typedef) & set(names_vars)):
+        print(" > typedef name " + v + " is not unique")
+
 
 def start_saint(srcfile: str):
     clang.cindex.Config.set_library_file('C:/Program Files/LLVM/bin/libclang.dll')
@@ -165,3 +191,5 @@ def start_saint(srcfile: str):
     index = clang.cindex.Index.create()
     translation_unit = index.parse(srcfile, ['-x', 'c++'])
     traverse(translation_unit.cursor)
+
+    post_check()
