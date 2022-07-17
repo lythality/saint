@@ -5,6 +5,7 @@ typedef struct _A {
     signed int      b: 2;
     unsigned int    c: 3;
     bool            d: 1;
+    signed int      e: 1;
 } A;
 
 typedef unsigned int UINT_16;

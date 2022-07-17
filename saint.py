@@ -1,3 +1,5 @@
+from webbrowser import get
+
 import clang.cindex
 from clang.cindex import TypeKind
 
@@ -77,9 +79,20 @@ def hook_expression(n: clang.cindex.CursorKind):
                 print(" > const char is assigned on non const char type")
 
 
+def get_bitfield_size(n):
+    for c in n.get_children():
+        if c.kind == clang.cindex.CursorKind.INTEGER_LITERAL:
+            text = ""
+            for t in c.get_tokens():
+                text = text + t.spelling
+            return int(text)
+    return None
+
+
 def hook_field_decl(n: clang.cindex.CursorKind):
     kind_of_type = n.type.get_canonical().kind
 
+    # checking whether it has correct type
     if kind_of_type == TypeKind.UINT or kind_of_type == TypeKind.UCHAR \
             or kind_of_type == TypeKind.CHAR_U or kind_of_type == TypeKind.USHORT \
             or kind_of_type == TypeKind.BOOL:
@@ -91,6 +104,10 @@ def hook_field_decl(n: clang.cindex.CursorKind):
             print(" > bit-field does not allow just int short char .... use signed keyword")
     else:
         print(" > bit-field only allows limited types (int, uint, short, ushort, char, uchar, bool)")
+
+    # checking whether it does not have signed 1 bit
+    if "signed" in getTokenString(n) and get_bitfield_size(n) == 1:
+        print(" > The size of signed bit-field shall be greater than 1")
 
 
 def collect_decl_var_names(n, names):
