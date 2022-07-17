@@ -5,4 +5,4 @@ from saint import start_saint
 
 # the main function
 if __name__ == '__main__':
-    start_saint('./test2.c')
+    start_saint('./test_bitfield.c')

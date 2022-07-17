@@ -1,4 +1,5 @@
 import clang.cindex
+from clang.cindex import TypeKind
 
 import re
 
@@ -76,6 +77,22 @@ def hook_expression(n: clang.cindex.CursorKind):
                 print(" > const char is assigned on non const char type")
 
 
+def hook_field_decl(n: clang.cindex.CursorKind):
+    kind_of_type = n.type.get_canonical().kind
+
+    if kind_of_type == TypeKind.UINT or kind_of_type == TypeKind.UCHAR \
+            or kind_of_type == TypeKind.CHAR_U or kind_of_type == TypeKind.USHORT \
+            or kind_of_type == TypeKind.BOOL:
+        # other types shall be a problem
+        pass
+    elif kind_of_type == TypeKind.INT or kind_of_type == TypeKind.CHAR16 \
+            or kind_of_type == TypeKind.CHAR32 or kind_of_type == TypeKind.SHORT:
+        if "signed" not in getTokenString(n):
+            print(" > bit-field does not allow just int short char .... use signed keyword")
+    else:
+        print(" > bit-field only allows limited types (int, uint, short, ushort, char, uchar, bool)")
+
+
 def collect_decl_var_names(n, names):
     if n.kind == clang.cindex.CursorKind.VAR_DECL:
         names.append(n.spelling)
@@ -110,6 +127,9 @@ def traverse(n, i=0):
 
     if n.kind == clang.cindex.CursorKind.INTEGER_LITERAL:
         hook_integer_literal(n)
+
+    if n.kind == clang.cindex.CursorKind.FIELD_DECL:
+        hook_field_decl(n)
 
     if n.kind.is_expression():
         hook_expression(n)
