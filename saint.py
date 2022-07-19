@@ -10,6 +10,8 @@ ARCHITECTURE_BITS = 16
 
 
 def getTokenString(n):
+    if n is None:
+        return "NONE"
     ret = ""
     for token in n.get_tokens():
         ret += token.spelling
@@ -58,6 +60,10 @@ def print_info(n, tab: int):
     print(n.type.spelling, end="")
     print(" :: ", end="")
     print(n.spelling, end="")
+    print(" :: ", end="")
+    print(is_global_var(n), end="")
+    print(" - ", end="")
+    print(is_static_var(n), end="")
     print(" :: ", end="")
     print(getTokenString(n), end="")
     print("")
@@ -162,27 +168,72 @@ def traverse(n, i=0):
 
 
 names_typedef = []
-names_vars = []
+names_external_vars = []
+names_internal_vars = []
+names_local_vars = []
+names_field_names = []
 
 
 def post_visit(n):
     global names_typedef
-    global names_vars
+    global names_external_vars
+    global names_internal_vars
+    global names_local_vars
+    global names_field_names
+
     if n.kind == clang.cindex.CursorKind.TYPEDEF_DECL:
         names_typedef.append(n.type.spelling)
-    elif n.kind == clang.cindex.CursorKind.VAR_DECL \
-            or n.kind == clang.cindex.CursorKind.FIELD_DECL :
-        names_vars.append(n.spelling)
+    elif n.kind == clang.cindex.CursorKind.VAR_DECL:
+        if is_global_var(n) and not is_static_var(n):
+            names_external_vars.append(n.spelling)
+        elif is_global_var(n) and is_static_var(n):
+            names_internal_vars.append(n.spelling)
+        else:
+            names_local_vars.append(n.spelling)
+    elif n.kind == clang.cindex.CursorKind.FIELD_DECL:
+        names_field_names.append(n.spelling)
+
+
+def is_global_var(n):
+    if n.semantic_parent is None:
+        return False
+    elif n.semantic_parent.kind == clang.cindex.CursorKind.TRANSLATION_UNIT:
+        return True
+    return False
+
+
+def is_static_var(n):
+    return "static" in getTokenString(n.get_definition())
 
 
 def post_check():
     global names_typedef
-    global names_vars
-    print(names_typedef)
-    print(names_vars)
+    global names_external_vars
+    global names_internal_vars
+    global names_local_vars
+    global names_field_names
 
+    print(names_typedef)
+    print(names_external_vars)
+    print(names_internal_vars)
+    print(names_local_vars)
+    print(names_field_names)
+
+    names_vars = list(set(names_external_vars) | set(names_internal_vars) | set(names_local_vars) | set(names_field_names))
+
+    # checking rule 5.6 (typedef name - unique)
     for v in list(set(names_typedef) & set(names_vars)):
         print(" > typedef name " + v + " is not unique")
+
+    # checking rule 5.8 (external var name - unique)
+    for v in list(set(names_external_vars) & set(names_internal_vars)):
+        print(" > extern var name " + v + " is not unique")
+    for v in list(set(names_external_vars) & set(names_local_vars)):
+        print(" > extern var name " + v + " is not unique")
+
+    # checking rule 5.9 (internal var name - unique)
+    for v in list(set(names_internal_vars) & set(names_local_vars)):
+        print(" > static var name " + v + " is not unique")
 
 
 def start_saint(srcfile: str):
@@ -191,5 +242,7 @@ def start_saint(srcfile: str):
     index = clang.cindex.Index.create()
     translation_unit = index.parse(srcfile, ['-x', 'c++'])
     traverse(translation_unit.cursor)
+
+    print(dir(translation_unit.cursor))
 
     post_check()

@@ -9,14 +9,25 @@ typedef struct UNIQUE {
 } UNIQUE;
 
 int A = 3;
-extern int B = 4;
+extern int B;
 static int C = 5;
+extern int D;
+static int E;
+
+int B = 4;
 
 struct s {
     unsigned int    b1:2;
 };
 
+int f1() {
+    int g;
+    float B;
+}
+
 int main() {
     int d, e, f;
+    static int g;
+    int C;
     return c;
 }
