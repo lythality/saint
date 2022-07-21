@@ -1,7 +1,7 @@
 from webbrowser import get
 
 import clang.cindex
-from clang.cindex import TypeKind
+from clang.cindex import TypeKind, CursorKind
 
 import re
 
@@ -69,7 +69,7 @@ def print_info(n, tab: int):
     print("")
 
 
-def hook_integer_literal(n: clang.cindex.CursorKind):
+def hook_integer_literal(n: CursorKind):
     text = ""
     for t in n.get_tokens():
         text = text + t.spelling
@@ -96,7 +96,7 @@ def hook_string_literal(n):
             print(" > trigraph " + tri + " shall not be used")
 
 
-def hook_expression(n: clang.cindex.CursorKind):
+def hook_expression(n: CursorKind):
     if is_assignment(n):
         if not isConstCharType(n):
             if hasConstCharTypeConstants(n):
@@ -105,7 +105,7 @@ def hook_expression(n: clang.cindex.CursorKind):
 
 def get_bitfield_size(n):
     for c in n.get_children():
-        if c.kind == clang.cindex.CursorKind.INTEGER_LITERAL:
+        if c.kind == CursorKind.INTEGER_LITERAL:
             text = ""
             for t in c.get_tokens():
                 text = text + t.spelling
@@ -113,7 +113,7 @@ def get_bitfield_size(n):
     return None
 
 
-def hook_field_decl(n: clang.cindex.CursorKind):
+def hook_field_decl(n: CursorKind):
     kind_of_type = n.type.get_canonical().kind
 
     # checking whether it has correct type
@@ -135,12 +135,12 @@ def hook_field_decl(n: clang.cindex.CursorKind):
 
 
 def collect_decl_var_names(n, names):
-    if n.kind == clang.cindex.CursorKind.VAR_DECL:
+    if n.kind == CursorKind.VAR_DECL:
         names.append(n.spelling)
 
     # iterate recursively
     for c in n.get_children():
-        if c.kind == clang.cindex.CursorKind.COMPOUND_STMT:
+        if c.kind == CursorKind.COMPOUND_STMT:
             continue
         collect_decl_var_names(c, names)
 
@@ -153,7 +153,7 @@ def traverse(n, i=0):
     print_info(n, i)
 
     var_names_inside_comp_stmt = []
-    if n.kind == clang.cindex.CursorKind.COMPOUND_STMT:
+    if n.kind == CursorKind.COMPOUND_STMT:
         collect_decl_var_names(n, var_names_inside_comp_stmt)
         # check intersection
         intersection = list(set(var_names_scope) & set(var_names_inside_comp_stmt))
@@ -162,20 +162,20 @@ def traverse(n, i=0):
             var_names_inside_comp_stmt = list(set(var_names_inside_comp_stmt) - set(intersection))
         var_names_scope.extend(var_names_inside_comp_stmt)
 
-    if n.kind == clang.cindex.CursorKind.COMPOUND_STMT:
+    if n.kind == CursorKind.COMPOUND_STMT:
         collect_decl_var_names(n, var_names_inside_comp_stmt)
         var_names_scope.extend(var_names_inside_comp_stmt)
 
-    if n.kind == clang.cindex.CursorKind.INTEGER_LITERAL:
+    if n.kind == CursorKind.INTEGER_LITERAL:
         hook_integer_literal(n)
 
-    if n.kind == clang.cindex.CursorKind.FIELD_DECL:
+    if n.kind == CursorKind.FIELD_DECL:
         hook_field_decl(n)
 
-    if n.kind == clang.cindex.CursorKind.CHARACTER_LITERAL:
+    if n.kind == CursorKind.CHARACTER_LITERAL:
         hook_char_literal(n)
 
-    if n.kind == clang.cindex.CursorKind.STRING_LITERAL:
+    if n.kind == CursorKind.STRING_LITERAL:
         hook_string_literal(n)
 
     if n.kind.is_expression():
@@ -185,7 +185,7 @@ def traverse(n, i=0):
     for c in n.get_children():
         traverse(c, i+1)
 
-    if n.kind == clang.cindex.CursorKind.COMPOUND_STMT:
+    if n.kind == CursorKind.COMPOUND_STMT:
         var_names_scope = list(set(var_names_scope) - set(var_names_inside_comp_stmt))
 
     post_visit(n)
@@ -211,16 +211,16 @@ def post_visit(n):
     global names_field_names
     global names_tags
 
-    if n.kind == clang.cindex.CursorKind.TYPEDEF_DECL:
+    if n.kind == CursorKind.TYPEDEF_DECL:
         names_typedef.append(n.type.spelling)
-    elif n.kind == clang.cindex.CursorKind.VAR_DECL:
+    elif n.kind == CursorKind.VAR_DECL:
         if is_global_var(n) and not is_static_var(n):
             names_external_vars.append(n.spelling)
         elif is_global_var(n) and is_static_var(n):
             names_internal_vars.append(n.spelling)
         else:
             names_local_vars.append(n.spelling)
-    elif n.kind == clang.cindex.CursorKind.STRUCT_DECL:
+    elif n.kind == CursorKind.STRUCT_DECL:
         tag = n.type.spelling
         definition = getTokenString(n)
         if "unnamed struct at " in tag:
@@ -230,14 +230,14 @@ def post_visit(n):
         else:
             found_tag[tag] = definition
             names_tags.append(tag)
-    elif n.kind == clang.cindex.CursorKind.FIELD_DECL:
+    elif n.kind == CursorKind.FIELD_DECL:
         names_field_names.append(n.spelling)
 
 
 def is_global_var(n):
     if n.semantic_parent is None:
         return False
-    elif n.semantic_parent.kind == clang.cindex.CursorKind.TRANSLATION_UNIT:
+    elif n.semantic_parent.kind == CursorKind.TRANSLATION_UNIT:
         return True
     return False
 
