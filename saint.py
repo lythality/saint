@@ -78,6 +78,24 @@ def hook_integer_literal(n: clang.cindex.CursorKind):
     print(" > non-obvious signed int is used\n" if is_non_obvious_sign(text) else "", end="")
 
 
+# trigraph ??' may used in C code as ??\', we take care of it
+trigraph_strings = ['??=', '??(', '??/', '??)', '??\\\'', '??<', '??!', '??>', '??-']
+
+
+def hook_char_literal(n):
+    global trigraph_strings
+    for tri in trigraph_strings:
+        if tri in getTokenString(n):
+            print(" > trigraph " + tri + " shall not be used")
+
+
+def hook_string_literal(n):
+    global trigraph_strings
+    for tri in trigraph_strings:
+        if tri in getTokenString(n):
+            print(" > trigraph " + tri + " shall not be used")
+
+
 def hook_expression(n: clang.cindex.CursorKind):
     if is_assignment(n):
         if not isConstCharType(n):
@@ -153,6 +171,12 @@ def traverse(n, i=0):
 
     if n.kind == clang.cindex.CursorKind.FIELD_DECL:
         hook_field_decl(n)
+
+    if n.kind == clang.cindex.CursorKind.CHARACTER_LITERAL:
+        hook_char_literal(n)
+
+    if n.kind == clang.cindex.CursorKind.STRING_LITERAL:
+        hook_string_literal(n)
 
     if n.kind.is_expression():
         hook_expression(n)
