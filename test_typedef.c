@@ -4,6 +4,14 @@ typedef struct _A {
     unsigned int    a: 2;
 } A;
 
+struct _B {
+    signed int    a: 2;
+};
+
+struct _B {
+    unsigned int    a: 2;
+};
+
 typedef struct UNIQUE {
     unsigned int    a: 2;
 } UNIQUE;
@@ -23,6 +31,14 @@ struct s {
 int f1() {
     int g;
     float B;
+    struct _A {
+        unsigned int    a: 2;
+        unsigned int    b: 2;
+        unsigned int    c: 2;
+    }
+
+    struct _A decl1;
+    union _A decl2;
 }
 
 int main() {

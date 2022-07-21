@@ -196,6 +196,11 @@ names_external_vars = []
 names_internal_vars = []
 names_local_vars = []
 names_field_names = []
+names_tags = []
+
+
+# name : token_string
+found_tag = {}
 
 
 def post_visit(n):
@@ -204,6 +209,7 @@ def post_visit(n):
     global names_internal_vars
     global names_local_vars
     global names_field_names
+    global names_tags
 
     if n.kind == clang.cindex.CursorKind.TYPEDEF_DECL:
         names_typedef.append(n.type.spelling)
@@ -214,6 +220,16 @@ def post_visit(n):
             names_internal_vars.append(n.spelling)
         else:
             names_local_vars.append(n.spelling)
+    elif n.kind == clang.cindex.CursorKind.STRUCT_DECL:
+        tag = n.type.spelling
+        definition = getTokenString(n)
+        if "unnamed struct at " in tag:
+            print(" > duplicated tag name in " + definition)
+        elif tag in found_tag and found_tag[tag] == definition:
+            pass
+        else:
+            found_tag[tag] = definition
+            names_tags.append(tag)
     elif n.kind == clang.cindex.CursorKind.FIELD_DECL:
         names_field_names.append(n.spelling)
 
@@ -230,24 +246,40 @@ def is_static_var(n):
     return "static" in getTokenString(n.get_definition())
 
 
+def get_dict_from_list(my_list):
+    new_dict = {}
+    for e in my_list:
+        try: new_dict[e] +=1
+        except: new_dict[e] = 1
+    return new_dict
+
+
 def post_check():
     global names_typedef
     global names_external_vars
     global names_internal_vars
     global names_local_vars
     global names_field_names
+    global names_tags
 
     print(names_typedef)
     print(names_external_vars)
     print(names_internal_vars)
     print(names_local_vars)
     print(names_field_names)
+    print(names_tags)
 
-    names_vars = list(set(names_external_vars) | set(names_internal_vars) | set(names_local_vars) | set(names_field_names))
+    names_vars = list(set(names_external_vars) | set(names_internal_vars) | set(names_local_vars)
+                      | set(names_field_names))
 
     # checking rule 5.6 (typedef name - unique)
     for v in list(set(names_typedef) & set(names_vars)):
         print(" > typedef name " + v + " is not unique")
+
+    # checking rule 5.7 (tag name - unique)
+    for key in get_dict_from_list(names_tags).keys():
+        if get_dict_from_list(names_tags)[key] > 1:
+            print(" > tag name " + key + " is not unique")
 
     # checking rule 5.8 (external var name - unique)
     for v in list(set(names_external_vars) & set(names_internal_vars)):
