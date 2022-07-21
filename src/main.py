@@ -1,6 +1,10 @@
-import sys
+from rule_checker import RuleChecker
 
-from saint import start_saint
+
+def start_saint(srcfile: str):
+    trav = RuleChecker()
+    trav.start_trav(srcfile)
+    trav.post_check()
 
 
 # the main function
