@@ -184,6 +184,29 @@ class RuleChecker(ClangTrav):
         if "signed" in getTokenString(n) and get_bitfield_size(n) == 1:
             print(" > The size of signed bit-field shall be greater than 1")
 
+
+    def hook_enum(self, n: CursorKind):
+        enum_dict_implicit = {}
+        enum_dict_explicit = {}
+        enum_prev_value = 0
+        # iterate constant
+        for c in n.get_children():
+            enum_const_text = getTokenString(c)
+            if "=" in enum_const_text:
+                enum_name = enum_const_text.split("=")[0]
+                enum_value = int(enum_const_text.split("=")[1])
+                enum_dict_explicit[enum_name] = enum_value
+            else:
+                enum_name = enum_const_text
+                enum_value = enum_prev_value+1
+                enum_dict_implicit[enum_name] = enum_value
+            enum_prev_value = enum_value
+        for key_ex, value_ex in enum_dict_explicit.items():
+            for key_im, value_im in enum_dict_implicit.items():
+                if value_ex == value_im:
+                    print(" > enum contains duplicated constant for "+key_ex+" = "+key_im+" = "+str(value_im))
+
+
     def post_visit(self, n):
         global names_typedef
         global names_external_vars

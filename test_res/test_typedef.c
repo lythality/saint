@@ -12,6 +12,18 @@ struct _B {
     unsigned int    a: 2;
 };
 
+typedef enum _C {
+    sunday=1, monday, tuesday, wednesday=3, thursday, friday, saturday
+} C;
+
+enum _D {
+    ONE, TWO, THREE=3, FOUR, FIVE, SIX, SAME_THREE=3
+};
+
+enum _E {
+    sunday=77, monday, tuesday, wednesday, thursday, friday, saturday
+};
+
 typedef struct UNIQUE {
     unsigned int    a: 2;
 } UNIQUE;

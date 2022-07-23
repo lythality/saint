@@ -24,6 +24,9 @@ class ClangTrav:
         if n.kind == CursorKind.FIELD_DECL:
             self.hook_field_decl(n)
 
+        if n.kind == CursorKind.ENUM_DECL:
+            self.hook_enum(n)
+
         if n.kind == CursorKind.CHARACTER_LITERAL:
             self.hook_char_literal(n)
 
@@ -61,6 +64,9 @@ class ClangTrav:
         pass
 
     def hook_field_decl(self, n: CursorKind):
+        pass
+
+    def hook_enum(self, n: CursorKind):
         pass
 
     def post_visit(self, n):
