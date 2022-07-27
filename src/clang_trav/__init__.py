@@ -33,6 +33,9 @@ class ClangTrav:
         if n.kind == CursorKind.STRING_LITERAL:
             self.hook_string_literal(n)
 
+        if n.kind == CursorKind.FUNCTION_DECL:
+            self.hook_function_decl(n)
+
         if n.kind.is_expression():
             self.hook_expression(n)
 
@@ -64,6 +67,9 @@ class ClangTrav:
         pass
 
     def hook_field_decl(self, n: CursorKind):
+        pass
+
+    def hook_function_decl(self, n: CursorKind):
         pass
 
     def hook_enum(self, n: CursorKind):

@@ -185,6 +185,12 @@ class RuleChecker(ClangTrav):
             print(" > The size of signed bit-field shall be greater than 1")
 
 
+    def hook_function_decl(self, n: CursorKind):
+        signature = getTokenString(n)
+        if signature.startswith("inline") or signature.startswith("externinline"):
+            print(" > an inline function shall be declared as static inline")
+
+
     def hook_enum(self, n: CursorKind):
         enum_dict_implicit = {}
         enum_dict_explicit = {}
