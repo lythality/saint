@@ -1,11 +1,11 @@
 import clang.cindex
 from clang.cindex import TypeKind, CursorKind
 
+clang.cindex.Config.set_library_file('C:/Program Files/LLVM/bin/libclang.dll')
+
 class ClangTrav:
 
     def start_trav(self, cfile):
-        clang.cindex.Config.set_library_file('C:/Program Files/LLVM/bin/libclang.dll')
-
         index = clang.cindex.Index.create()
         translation_unit = index.parse(cfile, ['-x', 'c++'])
         self.traverse(translation_unit.cursor)
