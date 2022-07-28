@@ -86,6 +86,9 @@ def collect_decl_var_names(n, names):
 var_names_scope = []
 
 
+external_vars = []
+
+
 names_typedef = []
 names_external_vars = []
 names_internal_vars = []
@@ -220,12 +223,14 @@ class RuleChecker(ClangTrav):
         global names_local_vars
         global names_field_names
         global names_tags
+        global external_vars
 
         if n.kind == CursorKind.TYPEDEF_DECL:
             names_typedef.append(n.type.spelling)
         elif n.kind == CursorKind.VAR_DECL:
             if is_global_var(n) and not is_static_var(n):
                 names_external_vars.append(n.spelling)
+                external_vars.append(n)
             elif is_global_var(n) and is_static_var(n):
                 names_internal_vars.append(n.spelling)
             else:
@@ -250,6 +255,7 @@ class RuleChecker(ClangTrav):
         global names_local_vars
         global names_field_names
         global names_tags
+        global external_vars
 
         print(names_typedef)
         print(names_external_vars)
@@ -257,6 +263,7 @@ class RuleChecker(ClangTrav):
         print(names_local_vars)
         print(names_field_names)
         print(names_tags)
+        print(external_vars)
 
         names_vars = list(set(names_external_vars) | set(names_internal_vars) | set(names_local_vars)
                           | set(names_field_names))
@@ -279,6 +286,15 @@ class RuleChecker(ClangTrav):
         # checking rule 5.9 (internal var name - unique)
         for v in list(set(names_internal_vars) & set(names_local_vars)):
             print(" > static var name " + v + " is not unique")
+
+        # linkage check
+        for i in range(0,len(external_vars)):
+            for j in range(i+1, len(external_vars)):
+                if i == j:
+                    continue
+                elif external_vars[i].mangled_name == external_vars[j].mangled_name:
+                    print(" >>> SAME var " + str(external_vars[i].mangled_name) + " " + str(external_vars[i].spelling) + " :: " + external_vars[j].spelling)
+
 
     def print_info(self, n, tab: int):
         print('\t' * tab, end="")
