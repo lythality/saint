@@ -3,7 +3,7 @@ from webbrowser import get
 import clang.cindex
 from clang.cindex import TypeKind, CursorKind
 
-from code_info import SWorkspace
+from clang_trav import ClangTrav
 
 import re
 
@@ -122,7 +122,7 @@ def get_dict_from_list(my_list):
     return new_dict
 
 
-class RuleChecker(SWorkspace):
+class RuleChecker(ClangTrav):
 
     def hook_enter_comp_stmt(self, n: CursorKind, var_names_inside_comp_stmt):
         global var_names_scope
@@ -150,6 +150,12 @@ class RuleChecker(SWorkspace):
         print(" > non-obvious signed int is used\n" if is_non_obvious_sign(text) else "", end="")
 
     def hook_char_literal(self, n):
+        global trigraph_strings
+        for tri in trigraph_strings:
+            if tri in getTokenString(n):
+                print(" > trigraph " + tri + " shall not be used")
+
+    def hook_string_literal(self, n):
         global trigraph_strings
         for tri in trigraph_strings:
             if tri in getTokenString(n):
@@ -288,15 +294,6 @@ class RuleChecker(SWorkspace):
                     continue
                 elif external_vars[i].mangled_name == external_vars[j].mangled_name:
                     print(" >>> SAME var " + str(external_vars[i].mangled_name) + " " + str(external_vars[i].spelling) + " :: " + external_vars[j].spelling)
-
-        # checking rule 4.2 - no_trigraph
-
-        # checking rule
-        global trigraph_strings
-        for tri in trigraph_strings:
-            for s in self.string_literal:
-                if tri in getTokenString(s):
-                    print(" > trigraph " + tri + " shall not be used")
 
 
     def print_info(self, n, tab: int):
