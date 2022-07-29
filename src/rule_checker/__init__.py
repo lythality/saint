@@ -141,14 +141,6 @@ class RuleChecker(SWorkspace):
         global var_names_scope
         var_names_scope = list(set(var_names_scope) - set(var_names_inside_comp_stmt))
 
-    def hook_integer_literal(self, n: CursorKind):
-        text = ""
-        for t in n.get_tokens():
-            text = text + t.spelling
-        print(" > OCTET IS USED\n" if isOctet(text) else "", end="")
-        print(" > LOWER LONG IS USED\n" if isLowerLongCharUsed(text) else "", end="")
-        print(" > non-obvious signed int is used\n" if is_non_obvious_sign(text) else "", end="")
-
     def hook_char_literal(self, n):
         global trigraph_strings
         for tri in trigraph_strings:
@@ -299,6 +291,18 @@ class RuleChecker(SWorkspace):
         for n in self.field_decl:
             if "signed" in getTokenString(n) and get_bitfield_size(n) == 1:
                 print(" > The size of signed bit-field shall be greater than 1")
+
+        # checking rule 7.1 - no octal
+        for n in self.integer_literal:
+            print(" > OCTET IS USED\n" if isOctet(getTokenString(n)) else "", end="")
+
+        # checking rule 7.2 - put u to all non-obvious signed integer
+        for n in self.integer_literal:
+            print(" > non-obvious signed int is used\n" if is_non_obvious_sign(getTokenString(n)) else "", end="")
+
+        # checking rule 7.3 - no_lower_long_char
+        for n in self.integer_literal:
+            print(" > LOWER CASE LONG CHAR L IS USED\n" if isLowerLongCharUsed(getTokenString(n)) else "", end="")
 
 
     def print_info(self, n, tab: int):
