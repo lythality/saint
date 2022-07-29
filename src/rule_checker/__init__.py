@@ -141,23 +141,11 @@ class RuleChecker(SWorkspace):
         global var_names_scope
         var_names_scope = list(set(var_names_scope) - set(var_names_inside_comp_stmt))
 
-    def hook_char_literal(self, n):
-        global trigraph_strings
-        for tri in trigraph_strings:
-            if tri in getTokenString(n):
-                print(" > trigraph " + tri + " shall not be used")
-
     def hook_expression(self, n: CursorKind):
         if is_assignment(n):
             if not isConstCharType(n):
                 if hasConstCharTypeConstants(n):
                     print(" > const char is assigned on non const char type")
-
-
-    def hook_function_decl(self, n: CursorKind):
-        signature = getTokenString(n)
-        if signature.startswith("inline") or signature.startswith("externinline"):
-            print(" > an inline function shall be declared as static inline")
 
 
     def hook_enum(self, n: CursorKind):
@@ -303,6 +291,12 @@ class RuleChecker(SWorkspace):
         # checking rule 7.3 - no_lower_long_char
         for n in self.integer_literal:
             print(" > LOWER CASE LONG CHAR L IS USED\n" if isLowerLongCharUsed(getTokenString(n)) else "", end="")
+
+        # checking rule 8.10 - static inline
+        for n in self.function_decl:
+            signature = getTokenString(n)
+            if signature.startswith("inline") or signature.startswith("externinline"):
+                print(" > an inline function shall be declared as static inline")
 
 
     def print_info(self, n, tab: int):
