@@ -14,4 +14,5 @@ if __name__ == '__main__':
     # start_saint('./test_res/test_multi002.c')
     # start_saint('./test_res/test.c')
     # start_saint('./test_res/test_typedef.c')
-    start_saint('./test_res/test_string.c')
+    # start_saint('./test_res/test_string.c')
+    start_saint('./test_res/test_bitfield.c')

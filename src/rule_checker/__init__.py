@@ -161,26 +161,6 @@ class RuleChecker(SWorkspace):
                 if hasConstCharTypeConstants(n):
                     print(" > const char is assigned on non const char type")
 
-    def hook_field_decl(self, n: CursorKind):
-        kind_of_type = n.type.get_canonical().kind
-
-        # checking whether it has correct type
-        if kind_of_type == TypeKind.UINT or kind_of_type == TypeKind.UCHAR \
-                or kind_of_type == TypeKind.CHAR_U or kind_of_type == TypeKind.USHORT \
-                or kind_of_type == TypeKind.BOOL:
-            # other types shall be a problem
-            pass
-        elif kind_of_type == TypeKind.INT or kind_of_type == TypeKind.CHAR16 \
-                or kind_of_type == TypeKind.CHAR32 or kind_of_type == TypeKind.SHORT:
-            if "signed" not in getTokenString(n):
-                print(" > bit-field does not allow just int short char .... use signed keyword")
-        else:
-            print(" > bit-field only allows limited types (int, uint, short, ushort, char, uchar, bool)")
-
-        # checking whether it does not have signed 1 bit
-        if "signed" in getTokenString(n) and get_bitfield_size(n) == 1:
-            print(" > The size of signed bit-field shall be greater than 1")
-
 
     def hook_function_decl(self, n: CursorKind):
         signature = getTokenString(n)
@@ -297,6 +277,28 @@ class RuleChecker(SWorkspace):
             for s in self.string_literal:
                 if tri in getTokenString(s):
                     print(" > trigraph " + tri + " shall not be used")
+
+        # checking rule 6.1 - bit_field_type are restricted
+        for n in self.field_decl:
+            kind_of_type = n.type.get_canonical().kind
+
+            # checking whether it has correct type
+            if kind_of_type == TypeKind.UINT or kind_of_type == TypeKind.UCHAR \
+                    or kind_of_type == TypeKind.CHAR_U or kind_of_type == TypeKind.USHORT \
+                    or kind_of_type == TypeKind.BOOL:
+                # other types shall be a problem
+                pass
+            elif kind_of_type == TypeKind.INT or kind_of_type == TypeKind.CHAR16 \
+                    or kind_of_type == TypeKind.CHAR32 or kind_of_type == TypeKind.SHORT:
+                if "signed" not in getTokenString(n):
+                    print(" > bit-field does not allow just int short char .... use signed keyword")
+            else:
+                print(" > bit-field only allows limited types (int, uint, short, ushort, char, uchar, bool)")
+
+        # checking rule 6.2 - signed_bit_field shall have more than 1 bit
+        for n in self.field_decl:
+            if "signed" in getTokenString(n) and get_bitfield_size(n) == 1:
+                print(" > The size of signed bit-field shall be greater than 1")
 
 
     def print_info(self, n, tab: int):
