@@ -141,13 +141,6 @@ class RuleChecker(SWorkspace):
         global var_names_scope
         var_names_scope = list(set(var_names_scope) - set(var_names_inside_comp_stmt))
 
-    def hook_expression(self, n: CursorKind):
-        if is_assignment(n):
-            if not isConstCharType(n):
-                if hasConstCharTypeConstants(n):
-                    print(" > const char is assigned on non const char type")
-
-
     def hook_enum(self, n: CursorKind):
         enum_dict_implicit = {}
         enum_dict_explicit = {}
@@ -291,6 +284,13 @@ class RuleChecker(SWorkspace):
         # checking rule 7.3 - no_lower_long_char
         for n in self.integer_literal:
             print(" > LOWER CASE LONG CHAR L IS USED\n" if isLowerLongCharUsed(getTokenString(n)) else "", end="")
+
+        # checking rule 7.4 - string only can be const char*
+        for n in self.expression:
+            if is_assignment(n):
+                if not isConstCharType(n):
+                    if hasConstCharTypeConstants(n):
+                        print(" > const char is assigned on non const char type")
 
         # checking rule 8.10 - static inline
         for n in self.function_decl:
