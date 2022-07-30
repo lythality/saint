@@ -4,6 +4,15 @@ from clang.cindex import TypeKind, CursorKind
 clang.cindex.Config.set_library_file('C:/Program Files/LLVM/bin/libclang.dll')
 
 
+def getTokenString(n):
+    if n is None:
+        return "NONE"
+    ret = ""
+    for token in n.get_tokens():
+        ret += token.spelling
+    return ret
+
+
 class SWorkspace:
 
     def __init__(self):
@@ -13,6 +22,7 @@ class SWorkspace:
         self.character_literal = []
         self.string_literal = []
         self.function_decl = []
+        self.var_decl = []
         self.field_decl = []
         self.enum_decl = []
         self.expression = []
@@ -26,6 +36,7 @@ class SWorkspace:
             self.character_literal.extend(t_unit.character_literal)
             self.string_literal.extend(t_unit.string_literal)
             self.function_decl.extend(t_unit.function_decl)
+            self.var_decl.extend(t_unit.var_decl)
             self.field_decl.extend(t_unit.field_decl)
             self.enum_decl.extend(t_unit.enum_decl)
             self.expression.extend(t_unit.expression)
@@ -43,6 +54,7 @@ class STranslationUnit:
         self.character_literal = []
         self.string_literal = []
         self.function_decl = []
+        self.var_decl = []
         self.field_decl = []
         self.enum_decl = []
         self.expression = []
@@ -68,6 +80,8 @@ class STranslationUnit:
             self.hook_enter_comp_stmt(n, var_names_inside_comp_stmt)
         elif n.kind == CursorKind.INTEGER_LITERAL:
             self.integer_literal.append(n)
+        elif n.kind == CursorKind.VAR_DECL:
+            self.var_decl.append(n)
         elif n.kind == CursorKind.FIELD_DECL:
             self.field_decl.append(n)
         elif n.kind == CursorKind.ENUM_DECL:
@@ -106,4 +120,7 @@ class STranslationUnit:
         print(n.type.spelling, end="")
         print(" :: ", end="")
         print(n.spelling, end="")
+        print(" :: ", end="")
+        print(getTokenString(n), end="")
         print("")
+        # print(n.data.__str__())

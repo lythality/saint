@@ -122,6 +122,21 @@ def get_dict_from_list(my_list):
     return new_dict
 
 
+def is_array(n:CursorKind):
+    return "[" in n.type.spelling
+
+
+# array size is a list as there are more than one size for n-array
+def get_array_size_list(n: CursorKind):
+    ret = []
+    if not is_array(n):
+        return None
+    for c in n.get_children():
+        if c.kind == CursorKind.INTEGER_LITERAL:
+            ret.append(int(getTokenString(c)))
+    return ret
+
+
 class RuleChecker(SWorkspace):
 
     def hook_enter_comp_stmt(self, n: CursorKind, var_names_inside_comp_stmt):
@@ -275,6 +290,14 @@ class RuleChecker(SWorkspace):
             signature = getTokenString(n)
             if signature.startswith("inline") or signature.startswith("externinline"):
                 print(" > an inline function shall be declared as static inline")
+
+        # checking rule 8.11 - extern array should have size
+        for n in self.var_decl:
+            signature = getTokenString(n)
+            if signature.startswith("extern") and is_array(n):
+                dimension = n.type.spelling.count("[")
+                if dimension != len(get_array_size_list(n)):
+                    print(" > extern array should have all size: "+n.spelling)
 
         # checking rule 8.12 - enum check
         for n in self.enum_decl:
