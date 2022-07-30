@@ -128,14 +128,34 @@ def is_array(n:CursorKind):
 
 # array size is a list as there are more than one size for n-array
 def get_array_size_list(n: CursorKind):
-    ret = []
     if not is_array(n):
         return None
+    ret = []
     for c in n.get_children():
         if c.kind == CursorKind.INTEGER_LITERAL:
             ret.append(int(getTokenString(c)))
     return ret
 
+
+def parse_array_initializer(n: CursorKind):
+    if n.kind != CursorKind.INIT_LIST_EXPR:
+        return n.spelling
+
+    ret = []
+    for c in n.get_children():
+        ret.append(parse_array_initializer(c))
+    return ret
+
+
+def get_array_initializer(n: CursorKind):
+    if not is_array(n):
+        return None
+
+    for c in n.get_children():
+        if c.kind == CursorKind.INIT_LIST_EXPR:
+            return parse_array_initializer(c)
+
+    return None
 
 class RuleChecker(SWorkspace):
 
@@ -322,18 +342,34 @@ class RuleChecker(SWorkspace):
                     if value_ex == value_im:
                         print(" > enum contains duplicated constant for "+key_ex+" = "+key_im+" = "+str(value_im))
 
+        # checking rule 9.3 - array partial define
+        for n in self.var_decl:
+            if not is_array(n) or getTokenString(n).startswith("extern"):
+                continue
+            dimension = n.type.spelling.count("[")
+            arr_size_list = list(reversed(get_array_size_list(n)))
+            if dimension != len(arr_size_list):
+                # handled on rule 8.11
+                continue
 
-    def print_info(self, n, tab: int):
-        print('\t' * tab, end="")
-        print(n.kind, end="")
-        print(" : ", end="")
-        print(n.type.spelling, end="")
-        print(" :: ", end="")
-        print(n.spelling, end="")
-        print(" :: ", end="")
-        print(is_global_var(n), end="")
-        print(" - ", end="")
-        print(is_static_var(n), end="")
-        print(" :: ", end="")
-        print(getTokenString(n), end="")
-        print("")
+            if not check_arr_size(get_array_initializer(n), arr_size_list, 0):
+                print(" > array is not fully defined: "+n.spelling)
+
+
+def check_arr_size(component, arr_size_list, idx):
+    if idx >= len(arr_size_list):
+        return True
+
+    # not defined item found
+    if component is None:
+        return False
+
+    if len(component) != arr_size_list[idx]:
+        return False
+
+    for element in component:
+        if not check_arr_size(element, arr_size_list, idx+1):
+            return False
+    return True
+
+
