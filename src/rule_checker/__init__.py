@@ -255,9 +255,22 @@ class RuleChecker(SWorkspace):
                 elif external_vars[i].mangled_name == external_vars[j].mangled_name:
                     print(" >>> SAME var " + str(external_vars[i].mangled_name) + " " + str(external_vars[i].spelling) + " :: " + external_vars[j].spelling)
 
-        # checking rule 4.2 - no_trigraph
+        # checking rule 3.[1,2] - no_in_comments, no_in_comments_2
+        for c in self.comments:
+            comment_text = c.spelling
+            if comment_text.startswith("//"):
+                comment_text = comment_text[2:]
+                if "\\" in comment_text:
+                    print(" > line splicing shall not be used in one-line comment: " + comment_text)
+            elif comment_text.startswith("/*"):
+                comment_text = comment_text[2:-2]
+            else:
+                print(" > unknown comment")
 
-        # checking rule
+            if "/*" in comment_text or "//" in comment_text:
+                print(" > /* or // shall not be used within comment: " + comment_text)
+
+        # checking rule 4.2 - no_trigraph
         global trigraph_strings
         for tri in trigraph_strings:
             for s in self.string_literal:

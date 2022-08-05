@@ -11,7 +11,8 @@ def start_saint(srcfile: str):
 # the main function
 if __name__ == '__main__':
     # start_saint('./test_res/test.c')
-    start_saint('./test_res/test_array.c')
+    # start_saint('./test_res/test_array.c')
+    start_saint('./test_res/test_comments.c')
     # start_saint('./test_res/test_func_decl.c')
     # start_saint('./test_res/test_multi001.c')
     # start_saint('./test_res/test_multi002.c')

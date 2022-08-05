@@ -1,5 +1,5 @@
 import clang.cindex
-from clang.cindex import TypeKind, CursorKind
+from clang.cindex import TypeKind, CursorKind, TokenKind
 
 clang.cindex.Config.set_library_file('C:/Program Files/LLVM/bin/libclang.dll')
 
@@ -26,6 +26,7 @@ class SWorkspace:
         self.field_decl = []
         self.enum_decl = []
         self.expression = []
+        self.comments = []
 
     def start_trav(self):
         index = clang.cindex.Index.create()
@@ -40,6 +41,7 @@ class SWorkspace:
             self.field_decl.extend(t_unit.field_decl)
             self.enum_decl.extend(t_unit.enum_decl)
             self.expression.extend(t_unit.expression)
+            self.comments.extend(t_unit.comments)
 
     def add_file(self, cfile):
         self.source_files.append(STranslationUnit(cfile))
@@ -58,6 +60,7 @@ class STranslationUnit:
         self.field_decl = []
         self.enum_decl = []
         self.expression = []
+        self.comments = []
 
         # self.names_typedef = []
         # self.names_external_vars = []
@@ -71,6 +74,12 @@ class STranslationUnit:
         index = clang.cindex.Index.create()
         translation_unit = index.parse(self.cfile, ['-x', 'c++'])
         self.traverse(translation_unit.cursor)
+        self.collect_comments(translation_unit.cursor.get_tokens())
+
+    def collect_comments(self, tokens):
+        for t in tokens:
+            if t.kind == TokenKind.COMMENT:
+                self.comments.append(t)
 
     def traverse(self, n, i=0):
         self.print_info(n, i)
