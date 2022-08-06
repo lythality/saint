@@ -1,8 +1,8 @@
-
-
 import re
 
 from clang.cindex import CursorKind
+
+from code_info.util import getTokenString
 
 
 def check_array_init(internal_array_vars):
@@ -211,12 +211,3 @@ def assign_at(none_array, index_array, value):
         none_array = none_array[index_array[0]]
         index_array = index_array[1:]
         assign_at(none_array, index_array, value)
-
-
-def getTokenString(n):
-    if n is None:
-        return "NONE"
-    ret = ""
-    for token in n.get_tokens():
-        ret += token.spelling
-    return ret

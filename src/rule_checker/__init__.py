@@ -4,6 +4,7 @@ import clang.cindex
 from clang.cindex import TypeKind, CursorKind
 
 from code_info import SWorkspace
+from code_info.util import getTokenString
 
 import re
 
@@ -11,15 +12,6 @@ from rule_checker.array_init_check import check_array_init
 
 
 ARCHITECTURE_BITS = 16
-
-
-def getTokenString(n):
-    if n is None:
-        return "NONE"
-    ret = ""
-    for token in n.get_tokens():
-        ret += token.spelling
-    return ret
 
 
 def isConstCharType(n):

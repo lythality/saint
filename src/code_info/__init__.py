@@ -1,16 +1,9 @@
 import clang.cindex
 from clang.cindex import TypeKind, CursorKind, TokenKind
 
+from code_info.util import getTokenString
+
 clang.cindex.Config.set_library_file('C:/Program Files/LLVM/bin/libclang.dll')
-
-
-def getTokenString(n):
-    if n is None:
-        return "NONE"
-    ret = ""
-    for token in n.get_tokens():
-        ret += token.spelling
-    return ret
 
 
 class SWorkspace:
