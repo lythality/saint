@@ -118,6 +118,17 @@ def get_dict_from_list(my_list):
 
 class RuleChecker(SWorkspace):
 
+    def __init__(self):
+        super().__init__()
+        self.violations = []
+
+    def add_violation(self, vio):
+        self.violations.append(vio)
+
+    def print_violations(self):
+        for vio in self.violations:
+            vio.print()
+
     def hook_enter_comp_stmt(self, n: CursorKind, var_names_inside_comp_stmt):
         global var_names_scope
         collect_decl_var_names(n, var_names_inside_comp_stmt)
@@ -317,4 +328,4 @@ class RuleChecker(SWorkspace):
         # checking rule 9.[2,3,4,5] - array init check
         internal_array_vars = list(filter(lambda v: is_array(v) and not getTokenString(v).startswith("extern"),
                                           self.var_decl))
-        check_array_init(internal_array_vars)
+        check_array_init(self, internal_array_vars)

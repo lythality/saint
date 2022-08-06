@@ -6,6 +6,7 @@ def start_saint(srcfile: str):
     trav.add_file(srcfile)
     trav.start_trav()
     trav.post_check()
+    trav.print_violations()
 
 
 # the main function
