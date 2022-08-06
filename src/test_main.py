@@ -21,8 +21,8 @@ class Test(TestCase):
         if len(violations) != 10:
             self.fail("missing violation")
 
-        # for vio in violations:
-        #     print(vio.rule_id, ", ", vio.sub_id, ", ", vio.supplementary)
+        for vio in violations:
+            print("%2d,%2d,%20s : %s" % (vio.rule_id, vio.sub_id, vio.supplementary, vio.get_message()))
 
         oracle = [Violation(9,  2,  "(1)"),
                 Violation(9,  3,  "dead_arr"),
