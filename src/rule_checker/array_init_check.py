@@ -6,18 +6,7 @@ from code_info.util import getTokenString
 
 
 def check_array_init(internal_array_vars):
-    # checking rule 9.3 - array partial define
-    for n in internal_array_vars:
-        dimension = n.type.spelling.count("[")
-        arr_size_list = list(reversed(get_array_size_list(n)))
-        if dimension != len(arr_size_list):
-            # handled on rule 8.11, so skip it.
-            continue
-
-        if not check_arr_size(get_array_initializer(n), arr_size_list, 0):
-            print(" > array is not fully defined: "+n.spelling)
-
-    # checking rule 9.[2,4,5] - array init check
+    # checking rule 9.[2,3,4,5] - array init check
     for n in internal_array_vars:
         dimension = n.type.spelling.count("[")
         arr_size_list = list(reversed(get_array_size_list(n)))
@@ -28,7 +17,21 @@ def check_array_init(internal_array_vars):
 
         none_array = get_none_array_of(arr_size_list, 0)
         initializer = get_array_initializer(n)
-        assigned_array = assign_initializer_to(get_none_array_of(arr_size_list, 0), get_array_initializer(n))
+        assigned_array = assign_initializer_to(none_array, initializer)
+
+        print(n.spelling, assigned_array)
+
+        if has_undefined_element(assigned_array):
+            print(" > (9.3) array is partially defined on : " + n.spelling)
+
+
+def has_undefined_element(assigned_array):
+    if type(assigned_array) != list:
+        return assigned_array is None
+    for element in assigned_array:
+        if has_undefined_element(element):
+            return True
+    return False
 
 
 def is_array(n:CursorKind):
