@@ -8,7 +8,7 @@ from code_info.util import getTokenString
 
 import re
 
-from rule_checker.array_init_check import check_array_init
+from rule_checker.array_init_check import check_array_init, is_array, get_array_size_list
 
 
 ARCHITECTURE_BITS = 16
@@ -114,21 +114,6 @@ def get_dict_from_list(my_list):
         try: new_dict[e] += 1
         except: new_dict[e] = 1
     return new_dict
-
-
-def is_array(n:CursorKind):
-    return "[" in n.type.spelling
-
-
-# array size is a list as there are more than one size for n-array
-def get_array_size_list(n: CursorKind):
-    if not is_array(n):
-        return None
-    ret = []
-    for c in n.get_children():
-        if c.kind == CursorKind.INTEGER_LITERAL:
-            ret.append(int(getTokenString(c)))
-    return ret
 
 
 class RuleChecker(SWorkspace):
