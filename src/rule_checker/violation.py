@@ -1,11 +1,18 @@
-
-
 class Violation:
 
     def __init__(self, rule_id, sub_id, supplementary):
         self.rule_id = rule_id
         self.sub_id = sub_id
         self.supplementary = supplementary
+
+    def __eq__(self, other):
+        if not hasattr(other, "rule_id") \
+                or not hasattr(other, "sub_id") \
+                or not hasattr(other, "supplementary"):
+            return False
+        return self.rule_id == other.rule_id and \
+                self.sub_id == other.sub_id and \
+                self.supplementary == other.supplementary
 
     def get_message(self):
         message = "Not defined"
@@ -22,4 +29,4 @@ class Violation:
         return "(%d,%d) %s" % (self.rule_id, self.sub_id, message)
 
     def print(self):
-        print(" > "+self.get_message())
+        print(" >  " + self.get_message())
