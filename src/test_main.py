@@ -84,12 +84,39 @@ class Test(TestCase):
 ''', '''=== basic_while ===
 0 [1] INIT_node
 1 [2] COMP-START-{while(g==3){}}
-2 [4, 6] while(g==3){}
+2 [5, 4] while(g==3){}
 3 [2] MERGE-while(g==3){}
-4 [5] COMP-START-{}
-5 [3] COMP-END-{}
-6 [7] COMP-END-{while(g==3){}}
-7 [] EXIT_node
+4 [7] WHILE-NEXT-while(g==3){}
+5 [6] COMP-START-{}
+6 [3] COMP-END-{}
+7 [8] COMP-END-{while(g==3){}}
+8 [] EXIT_node
+''', '''=== break_while ===
+0 [1] INIT_node
+1 [2] COMP-START-{while(g==1){g==2;break;}g==5;}
+2 [5, 4] while(g==1){g==2;break;}
+3 [2] MERGE-while(g==1){g==2;break;}
+4 [9] WHILE-NEXT-while(g==1){g==2;break;}
+5 [6] COMP-START-{g==2;break;}
+6 [7] g==2
+7 [4] break
+8 [3] COMP-END-{g==2;break;}
+9 [10] g==5
+10 [11] COMP-END-{while(g==1){g==2;break;}g==5;}
+11 [] EXIT_node
+''', '''=== cont_while ===
+0 [1] INIT_node
+1 [2] COMP-START-{while(g==1){g==2;continue;}g==5;}
+2 [5, 4] while(g==1){g==2;continue;}
+3 [2] MERGE-while(g==1){g==2;continue;}
+4 [9] WHILE-NEXT-while(g==1){g==2;continue;}
+5 [6] COMP-START-{g==2;continue;}
+6 [7] g==2
+7 [2] continue
+8 [3] COMP-END-{g==2;continue;}
+9 [10] g==5
+10 [11] COMP-END-{while(g==1){g==2;continue;}g==5;}
+11 [] EXIT_node
 ''', '''=== main ===
 0 [1] INIT_node
 1 [2] COMP-START-{inta;a=3+4+5+6+7;if(a==3){}elseif(a==4){}return0;}

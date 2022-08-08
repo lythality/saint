@@ -146,25 +146,27 @@ class Function:
         # There are at most one statement in function decl (mostly compound statement)
         assert(len([i for i in self.function_decl.get_children()]) == 1)
         for c in self.function_decl.get_children():
-            start_node_id, end_node_id = self._construct_control_flow_common(c)
+            start_node_id, end_node_id = self._construct_control_flow_common(c, [], [])
             exit_node_id = self._get_new_node(DummyNode("EXIT_node"))
             self._connect(init_node_id, start_node_id)
             self._connect(end_node_id, exit_node_id)
             break
 
     def _connect(self, curr, next):
+        if curr is None:
+            return
         self.control_flow[curr].append(next)
 
     # We do not just passing callers parameter down to callee
     # Always, parent connect start and end nodes
     # return: tuple of (start_node, end_node) of the block
-    def _construct_control_flow_common(self, curr_node):
+    def _construct_control_flow_common(self, curr_node, o_break_node_ids, o_cont_node_ids):
         if curr_node.kind == CursorKind.COMPOUND_STMT:
             comp_start_node_id = self._get_new_node(DummyNode("COMP-START-"+getTokenString(curr_node)))
             before_node_id = comp_start_node_id
 
             for c in curr_node.get_children():
-                start_node_id, end_node_id = self._construct_control_flow_common(c)
+                start_node_id, end_node_id = self._construct_control_flow_common(c, o_break_node_ids, o_cont_node_ids)
                 self._connect(before_node_id, start_node_id)
                 before_node_id = end_node_id
 
@@ -184,24 +186,29 @@ class Function:
                     state = IF_TRUE_STATEMENT
                     continue
                 elif state == IF_TRUE_STATEMENT:
-                    start_node_id, end_node_id = self._construct_control_flow_common(c)
+                    start_node_id, end_node_id = self._construct_control_flow_common(c, o_break_node_ids, o_cont_node_ids)
                     self._connect(curr_node_id, start_node_id)
                     self._connect(end_node_id, merge_node_id)
                     state = IF_FALSE_STATEMENT
                 elif state == IF_FALSE_STATEMENT:
-                    start_node_id, end_node_id = self._construct_control_flow_common(c)
+                    start_node_id, end_node_id = self._construct_control_flow_common(c, o_break_node_ids, o_cont_node_ids)
                     self._connect(curr_node_id, start_node_id)
                     self._connect(end_node_id, merge_node_id)
                     state = IF_FULLY_ITERATED
 
             if state != IF_FULLY_ITERATED:
-                start_node_id, end_node_id = self._construct_control_flow_common(c)
+                start_node_id, end_node_id = self._construct_control_flow_common(c, o_break_node_ids, o_cont_node_ids)
                 self._connect(curr_node_id, start_node_id)
                 self._connect(end_node_id, merge_node_id)
             return curr_node_id, merge_node_id
         elif curr_node.kind == CursorKind.WHILE_STMT:
             curr_node_id = self._get_new_node(curr_node)
             merge_node_id = self._get_new_node(DummyNode("MERGE-"+getTokenString(curr_node)))
+            while_next_node_id = self._get_new_node(DummyNode("WHILE-NEXT-" + getTokenString(curr_node)))
+
+            while_breaks = []
+            while_continues = []
+
             WHILE_CONDITION = 0
             WHILE_BODY = 1
             WHILE_FULLY_ITERATED = 2
@@ -211,12 +218,25 @@ class Function:
                     state = WHILE_BODY
                     continue
                 elif state == WHILE_BODY:
-                    start_node_id, end_node_id = self._construct_control_flow_common(c)
+                    start_node_id, end_node_id = self._construct_control_flow_common(c, while_breaks, while_continues)
                     self._connect(curr_node_id, start_node_id)
                     self._connect(end_node_id, merge_node_id)
                     state = WHILE_FULLY_ITERATED
             self._connect(merge_node_id, curr_node_id)
-            return curr_node_id, curr_node_id
+            self._connect(curr_node_id, while_next_node_id)
+            for break_node_id in while_breaks:
+                self._connect(break_node_id, while_next_node_id)
+            for cont_node_id in while_continues:
+                self._connect(cont_node_id, curr_node_id)
+            return curr_node_id, while_next_node_id
+        elif curr_node.kind == CursorKind.BREAK_STMT:
+            curr_node_id = self._get_new_node(curr_node)
+            o_break_node_ids.append(curr_node_id)
+            return curr_node_id, None
+        elif curr_node.kind == CursorKind.CONTINUE_STMT:
+            curr_node_id = self._get_new_node(curr_node)
+            o_cont_node_ids.append(curr_node_id)
+            return curr_node_id, None
         elif curr_node.kind == CursorKind.BINARY_OPERATOR \
                 or curr_node.kind == CursorKind.DECL_STMT \
                 or curr_node.kind == CursorKind.RETURN_STMT:
