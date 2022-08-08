@@ -11,6 +11,17 @@ void nested_compound() {
     }
 }
 
+void basic_if() {
+    int a;
+
+    a = 3+4+5+6+7;
+
+    if (a==3) {
+
+    } else if (a==4) {
+
+    }
+}
 
 int main() {
     int a;

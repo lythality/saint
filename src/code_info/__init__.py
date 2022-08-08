@@ -142,12 +142,12 @@ class Function:
         self._construct_control_flow()
 
     def _construct_control_flow(self):
-        init_node_id = self._get_new_node(None)
+        init_node_id = self._get_new_node(DummyNode("INIT_node"))
         # There are at most one statement in function decl (mostly compound statement)
         assert(len([i for i in self.function_decl.get_children()]) == 1)
         for c in self.function_decl.get_children():
             start_node_id, end_node_id = self._construct_control_flow_common(c)
-            exit_node_id = self._get_new_node(None)
+            exit_node_id = self._get_new_node(DummyNode("EXIT_node"))
             self._connect(init_node_id, start_node_id)
             self._connect(end_node_id, exit_node_id)
             break
@@ -160,7 +160,7 @@ class Function:
     # return: tuple of (start_node, end_node) of the block
     def _construct_control_flow_common(self, curr_node):
         if curr_node.kind == CursorKind.COMPOUND_STMT:
-            comp_start_node_id = self._get_new_node(None)
+            comp_start_node_id = self._get_new_node(DummyNode("COMP-START-"+getTokenString(curr_node)))
             before_node_id = comp_start_node_id
 
             for c in curr_node.get_children():
@@ -168,12 +168,12 @@ class Function:
                 self._connect(before_node_id, start_node_id)
                 before_node_id = end_node_id
 
-            comp_end_node_id = self._get_new_node(None)
+            comp_end_node_id = self._get_new_node(DummyNode("COMP-END-"+getTokenString(curr_node)))
             self._connect(before_node_id, comp_end_node_id)
             return comp_start_node_id, comp_end_node_id
         elif curr_node.kind == CursorKind.IF_STMT:
             curr_node_id = self._get_new_node(curr_node)
-            merge_node_id = self._get_new_node(None)
+            merge_node_id = self._get_new_node(DummyNode("MERGE-"+getTokenString(curr_node)))
             IF_CONDITION = 0
             IF_TRUE_STATEMENT = 1
             IF_FALSE_STATEMENT = 2
@@ -199,11 +199,9 @@ class Function:
                 self._connect(curr_node_id, start_node_id)
                 self._connect(end_node_id, merge_node_id)
             return curr_node_id, merge_node_id
-        elif curr_node.kind == CursorKind.BINARY_OPERATOR:
-            curr_node_id = self._get_new_node(curr_node)
-            return curr_node_id, curr_node_id
-        else:
-            # curr_node.kind == CursorKind.DECL_STMT or curr_node.kind == CursorKind.RETURN_STMT
+        elif curr_node.kind == CursorKind.BINARY_OPERATOR \
+                or curr_node.kind == CursorKind.DECL_STMT \
+                or curr_node.kind == CursorKind.RETURN_STMT:
             curr_node_id = self._get_new_node(curr_node)
             return curr_node_id, curr_node_id
 
@@ -229,3 +227,16 @@ class Function:
             else:
                 ret += "%s %s\n" % (str(n), str(self.control_flow[n]))
         return ret
+
+class DummyToken:
+
+    def __init__(self, name):
+        self.spelling = name
+
+class DummyNode:
+
+    def __init__(self, name):
+        self.tokens = [DummyToken(txt) for txt in name.split()]
+
+    def get_tokens(self):
+        return self.tokens

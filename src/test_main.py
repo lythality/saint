@@ -52,37 +52,55 @@ class Test(TestCase):
         cfg_infos = get_control_flow_graph('../test_res/test_control.c')
 
         oracle = ['''=== nested_compound ===
-0 [1]
-1 [2]
+0 [1] INIT_node
+1 [2] COMP-START-{intn;{{{n=1;}}}}
 2 [3] intn;
-3 [4]
-4 [5]
-5 [6]
+3 [4] COMP-START-{{{n=1;}}}
+4 [5] COMP-START-{{n=1;}}
+5 [6] COMP-START-{n=1;}
 6 [7] n=1
-7 [8]
-8 [9]
-9 [10]
-10 [11]
-11 []
-''', '''=== main ===
-0 [1]
-1 [2]
+7 [8] COMP-END-{n=1;}
+8 [9] COMP-END-{{n=1;}}
+9 [10] COMP-END-{{{n=1;}}}
+10 [11] COMP-END-{intn;{{{n=1;}}}}
+11 [] EXIT_node
+''', '''=== basic_if ===
+0 [1] INIT_node
+1 [2] COMP-START-{inta;a=3+4+5+6+7;if(a==3){}elseif(a==4){}}
 2 [3] inta;
 3 [4] a=3+4+5+6+7
 4 [6, 8] if(a==3){}elseif(a==4){}
-5 [14]
-6 [7]
-7 [5]
+5 [14] MERGE-if(a==3){}elseif(a==4){}
+6 [7] COMP-START-{}
+7 [5] COMP-END-{}
 8 [10, 12] if(a==4){}
-9 [5]
-10 [11]
-11 [9]
-12 [13]
-13 [9]
+9 [5] MERGE-if(a==4){}
+10 [11] COMP-START-{}
+11 [9] COMP-END-{}
+12 [13] COMP-START-{}
+13 [9] COMP-END-{}
+14 [15] COMP-END-{inta;a=3+4+5+6+7;if(a==3){}elseif(a==4){}}
+15 [] EXIT_node
+''', '''=== main ===
+0 [1] INIT_node
+1 [2] COMP-START-{inta;a=3+4+5+6+7;if(a==3){}elseif(a==4){}return0;}
+2 [3] inta;
+3 [4] a=3+4+5+6+7
+4 [6, 8] if(a==3){}elseif(a==4){}
+5 [14] MERGE-if(a==3){}elseif(a==4){}
+6 [7] COMP-START-{}
+7 [5] COMP-END-{}
+8 [10, 12] if(a==4){}
+9 [5] MERGE-if(a==4){}
+10 [11] COMP-START-{}
+11 [9] COMP-END-{}
+12 [13] COMP-START-{}
+13 [9] COMP-END-{}
 14 [15] return0
-15 [16]
-16 []
+15 [16] COMP-END-{inta;a=3+4+5+6+7;if(a==3){}elseif(a==4){}return0;}
+16 [] EXIT_node
 ''']
+        print(cfg_infos)
         for cfg in oracle:
             self.assertTrue(cfg in cfg_infos, "missing cfg: "+cfg)
 
