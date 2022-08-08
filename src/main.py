@@ -7,6 +7,8 @@ def start_saint(srcfile: str):
     trav.start_trav()
     trav.post_check()
     trav.print_violations()
+    for f in trav.function:
+        f.print_control_flow_graph()
 
 
 # the main function
@@ -18,8 +20,9 @@ if __name__ == '__main__':
             start_saint(arg)
     else:
         # start_saint('../test_res/test.c')
-        start_saint('../test_res/test_array.c')
+        # start_saint('../test_res/test_array.c')
         # start_saint('../test_res/test_comments.c')
+        start_saint('../test_res/test_control.c')
         # start_saint('../test_res/test_func_decl.c')
         # start_saint('../test_res/test_multi001.c')
         # start_saint('../test_res/test_multi002.c')
