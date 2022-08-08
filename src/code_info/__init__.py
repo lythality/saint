@@ -199,6 +199,24 @@ class Function:
                 self._connect(curr_node_id, start_node_id)
                 self._connect(end_node_id, merge_node_id)
             return curr_node_id, merge_node_id
+        elif curr_node.kind == CursorKind.WHILE_STMT:
+            curr_node_id = self._get_new_node(curr_node)
+            merge_node_id = self._get_new_node(DummyNode("MERGE-"+getTokenString(curr_node)))
+            WHILE_CONDITION = 0
+            WHILE_BODY = 1
+            WHILE_FULLY_ITERATED = 2
+            state = WHILE_CONDITION
+            for c in curr_node.get_children():
+                if state == WHILE_CONDITION:
+                    state = WHILE_BODY
+                    continue
+                elif state == WHILE_BODY:
+                    start_node_id, end_node_id = self._construct_control_flow_common(c)
+                    self._connect(curr_node_id, start_node_id)
+                    self._connect(end_node_id, merge_node_id)
+                    state = WHILE_FULLY_ITERATED
+            self._connect(merge_node_id, curr_node_id)
+            return curr_node_id, curr_node_id
         elif curr_node.kind == CursorKind.BINARY_OPERATOR \
                 or curr_node.kind == CursorKind.DECL_STMT \
                 or curr_node.kind == CursorKind.RETURN_STMT:

@@ -81,6 +81,15 @@ class Test(TestCase):
 13 [9] COMP-END-{}
 14 [15] COMP-END-{inta;a=3+4+5+6+7;if(a==3){}elseif(a==4){}}
 15 [] EXIT_node
+''', '''=== basic_while ===
+0 [1] INIT_node
+1 [2] COMP-START-{while(g==3){}}
+2 [4, 6] while(g==3){}
+3 [2] MERGE-while(g==3){}
+4 [5] COMP-START-{}
+5 [3] COMP-END-{}
+6 [7] COMP-END-{while(g==3){}}
+7 [] EXIT_node
 ''', '''=== main ===
 0 [1] INIT_node
 1 [2] COMP-START-{inta;a=3+4+5+6+7;if(a==3){}elseif(a==4){}return0;}

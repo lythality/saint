@@ -1,4 +1,6 @@
 
+int g;
+
 void nested_compound() {
     int n;
 
@@ -19,6 +21,12 @@ void basic_if() {
     if (a==3) {
 
     } else if (a==4) {
+
+    }
+}
+
+void basic_while() {
+    while (g==3) {
 
     }
 }
