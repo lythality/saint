@@ -153,14 +153,12 @@ class Function:
             break
 
     def _connect(self, curr, next):
-        print("connecting", curr, next)
         self.control_flow[curr].append(next)
 
     # We do not just passing callers parameter down to callee
     # Always, parent connect start and end nodes
     # return: tuple of (start_node, end_node) of the block
     def _construct_control_flow_common(self, curr_node):
-        print("visiting", getTokenString(curr_node))
         if curr_node.kind == CursorKind.COMPOUND_STMT:
             comp_start_node_id = self._get_new_node(None)
             before_node_id = comp_start_node_id
@@ -223,11 +221,11 @@ class Function:
 
         return new_id
 
-    def print_control_flow_graph(self):
-        print("===", self.function_decl.spelling, "===")
+    def get_control_flow_graph_info(self):
+        ret = "=== " + self.function_decl.spelling + " ===\n"
         for n in self.node_map.keys():
             if self.node_map[n] is not None:
-                print(n, self.control_flow[n], getTokenString(self.node_map[n]))
+                ret += "%s %s %s\n" %(str(n), str(self.control_flow[n]), getTokenString(self.node_map[n]))
             else:
-                print(n, self.control_flow[n])
-        print()
+                ret += "%s %s\n" % (str(n), str(self.control_flow[n]))
+        return ret

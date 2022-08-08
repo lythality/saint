@@ -8,7 +8,7 @@ def start_saint(srcfile: str):
     trav.post_check()
     trav.print_violations()
     for f in trav.function:
-        f.print_control_flow_graph()
+        print(f.get_control_flow_graph_info())
 
 
 # the main function
