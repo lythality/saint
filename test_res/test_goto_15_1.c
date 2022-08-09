@@ -1,5 +1,4 @@
-
-void f(void) {
+void f_15_1(void) {
     int j = 0;
 L1:
     ++j;
