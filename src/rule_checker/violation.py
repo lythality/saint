@@ -26,6 +26,10 @@ class Violation:
             elif self.sub_id == 5:
                 message = "array size is not given on index based initialized array %s" % self.supplementary
 
+        elif self.rule_id == 15:
+            if self.sub_id == 1:
+                message = "goto (%s) is used" % self.supplementary
+
         return "(%d,%d) %s" % (self.rule_id, self.sub_id, message)
 
     def print(self):

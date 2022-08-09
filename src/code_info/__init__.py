@@ -139,7 +139,7 @@ class Function:
         self.node_map = {}
         self.control_flow = {}
         self.node_size = 0
-        self._construct_control_flow()
+        # self._construct_control_flow()
 
     def _construct_control_flow(self):
         init_node_id = self._get_new_node(DummyNode("INIT_node"))

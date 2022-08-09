@@ -48,6 +48,22 @@ class Test(TestCase):
             if vio not in violations:
                 self.fail("missing violation: "+vio.get_message())
 
+    def test_goto(self):
+        violations = get_violations('../test_res/test_goto.c')
+
+        if len(violations) != 2:
+            self.fail("missing violation")
+
+        for vio in violations:
+            print("%2d,%2d,%20s : %s" % (vio.rule_id, vio.sub_id, vio.supplementary, vio.get_message()))
+
+        oracle = [Violation(15,  1,  "gotoL2"),
+                Violation(15,  1,  "gotoL1")]
+
+        for vio in oracle:
+            if vio not in violations:
+                self.fail("missing violation: "+vio.get_message())
+
     def test_control_flow(self):
         cfg_infos = get_control_flow_graph('../test_res/test_control.c')
 

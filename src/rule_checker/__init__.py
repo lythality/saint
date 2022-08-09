@@ -9,6 +9,7 @@ from code_info.util import getTokenString
 import re
 
 from rule_checker.array_init_check import check_array_init, is_array, get_array_size_list
+from rule_checker.goto_check import check_goto
 
 
 ARCHITECTURE_BITS = 16
@@ -329,3 +330,6 @@ class RuleChecker(SWorkspace):
         internal_array_vars = list(filter(lambda v: is_array(v) and not getTokenString(v).startswith("extern"),
                                           self.var_decl))
         check_array_init(self, internal_array_vars)
+
+        # checking rule 15.* - goto check
+        check_goto(self, self.function)
