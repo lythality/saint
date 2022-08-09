@@ -70,17 +70,16 @@ class Test(TestCase):
 2 [3] inta;
 3 [4] a=3+4+5+6+7
 4 [6, 8] if(a==3){}elseif(a==4){}
-5 [14] MERGE-if(a==3){}elseif(a==4){}
+5 [13] MERGE-if(a==3){}elseif(a==4){}
 6 [7] COMP-START-{}
 7 [5] COMP-END-{}
 8 [10, 12] if(a==4){}
 9 [5] MERGE-if(a==4){}
 10 [11] COMP-START-{}
 11 [9] COMP-END-{}
-12 [13] COMP-START-{}
-13 [9] COMP-END-{}
-14 [15] COMP-END-{inta;a=3+4+5+6+7;if(a==3){}elseif(a==4){}}
-15 [] EXIT_node
+12 [9] EMPTYELSE-if(a==4){}
+13 [14] COMP-END-{inta;a=3+4+5+6+7;if(a==3){}elseif(a==4){}}
+14 [] EXIT_node
 ''', '''=== basic_while ===
 0 [1] INIT_node
 1 [2] COMP-START-{while(g==3){}}
@@ -112,29 +111,67 @@ class Test(TestCase):
 4 [9] WHILE-NEXT-while(g==1){g==2;continue;}
 5 [6] COMP-START-{g==2;continue;}
 6 [7] g==2
-7 [2] continue
+7 [3] continue
 8 [3] COMP-END-{g==2;continue;}
 9 [10] g==5
 10 [11] COMP-END-{while(g==1){g==2;continue;}g==5;}
 11 [] EXIT_node
+''', '''=== nested_while ===
+0 [1] INIT_node
+1 [2] COMP-START-{while(g==1){if(g==2){break;}while(g==10){if(g==3){break;}if(g==4){continue;}}if(g==5){continue;}}}
+2 [5, 4] while(g==1){if(g==2){break;}while(g==10){if(g==3){break;}if(g==4){continue;}}if(g==5){continue;}}
+3 [2] MERGE-while(g==1){if(g==2){break;}while(g==10){if(g==3){break;}if(g==4){continue;}}if(g==5){continue;}}
+4 [36] WHILE-NEXT-while(g==1){if(g==2){break;}while(g==10){if(g==3){break;}if(g==4){continue;}}if(g==5){continue;}}
+5 [6] COMP-START-{if(g==2){break;}while(g==10){if(g==3){break;}if(g==4){continue;}}if(g==5){continue;}}
+6 [8, 11] if(g==2){break;}
+7 [12] MERGE-if(g==2){break;}
+8 [9] COMP-START-{break;}
+9 [4] break
+10 [7] COMP-END-{break;}
+11 [7] EMPTYELSE-if(g==2){break;}
+12 [15, 14] while(g==10){if(g==3){break;}if(g==4){continue;}}
+13 [12] MERGE-while(g==10){if(g==3){break;}if(g==4){continue;}}
+14 [29] WHILE-NEXT-while(g==10){if(g==3){break;}if(g==4){continue;}}
+15 [16] COMP-START-{if(g==3){break;}if(g==4){continue;}}
+16 [18, 21] if(g==3){break;}
+17 [22] MERGE-if(g==3){break;}
+18 [19] COMP-START-{break;}
+19 [14] break
+20 [17] COMP-END-{break;}
+21 [17] EMPTYELSE-if(g==3){break;}
+22 [24, 27] if(g==4){continue;}
+23 [28] MERGE-if(g==4){continue;}
+24 [25] COMP-START-{continue;}
+25 [13] continue
+26 [23] COMP-END-{continue;}
+27 [23] EMPTYELSE-if(g==4){continue;}
+28 [13] COMP-END-{if(g==3){break;}if(g==4){continue;}}
+29 [31, 34] if(g==5){continue;}
+30 [35] MERGE-if(g==5){continue;}
+31 [32] COMP-START-{continue;}
+32 [3] continue
+33 [30] COMP-END-{continue;}
+34 [30] EMPTYELSE-if(g==5){continue;}
+35 [3] COMP-END-{if(g==2){break;}while(g==10){if(g==3){break;}if(g==4){continue;}}if(g==5){continue;}}
+36 [37] COMP-END-{while(g==1){if(g==2){break;}while(g==10){if(g==3){break;}if(g==4){continue;}}if(g==5){continue;}}}
+37 [] EXIT_node
 ''', '''=== main ===
 0 [1] INIT_node
 1 [2] COMP-START-{inta;a=3+4+5+6+7;if(a==3){}elseif(a==4){}return0;}
 2 [3] inta;
 3 [4] a=3+4+5+6+7
 4 [6, 8] if(a==3){}elseif(a==4){}
-5 [14] MERGE-if(a==3){}elseif(a==4){}
+5 [13] MERGE-if(a==3){}elseif(a==4){}
 6 [7] COMP-START-{}
 7 [5] COMP-END-{}
 8 [10, 12] if(a==4){}
 9 [5] MERGE-if(a==4){}
 10 [11] COMP-START-{}
 11 [9] COMP-END-{}
-12 [13] COMP-START-{}
-13 [9] COMP-END-{}
-14 [15] return0
-15 [16] COMP-END-{inta;a=3+4+5+6+7;if(a==3){}elseif(a==4){}return0;}
-16 [] EXIT_node
+12 [9] EMPTYELSE-if(a==4){}
+13 [14] return0
+14 [15] COMP-END-{inta;a=3+4+5+6+7;if(a==3){}elseif(a==4){}return0;}
+15 [] EXIT_node
 ''']
         print(cfg_infos)
         for cfg in oracle:

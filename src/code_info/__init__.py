@@ -197,9 +197,9 @@ class Function:
                     state = IF_FULLY_ITERATED
 
             if state != IF_FULLY_ITERATED:
-                start_node_id, end_node_id = self._construct_control_flow_common(c, o_break_node_ids, o_cont_node_ids)
-                self._connect(curr_node_id, start_node_id)
-                self._connect(end_node_id, merge_node_id)
+                dummy_else_node_id = self._get_new_node(DummyNode("EMPTY ELSE-" + getTokenString(curr_node)))
+                self._connect(curr_node_id, dummy_else_node_id)
+                self._connect(dummy_else_node_id, merge_node_id)
             return curr_node_id, merge_node_id
         elif curr_node.kind == CursorKind.WHILE_STMT:
             curr_node_id = self._get_new_node(curr_node)
@@ -227,7 +227,7 @@ class Function:
             for break_node_id in while_breaks:
                 self._connect(break_node_id, while_next_node_id)
             for cont_node_id in while_continues:
-                self._connect(cont_node_id, curr_node_id)
+                self._connect(cont_node_id, merge_node_id)
             return curr_node_id, while_next_node_id
         elif curr_node.kind == CursorKind.BREAK_STMT:
             curr_node_id = self._get_new_node(curr_node)

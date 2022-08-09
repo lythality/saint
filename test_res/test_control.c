@@ -47,19 +47,38 @@ void cont_while() {
     g==5;
 }
 
-//void complicated_while() {
-//    while (g==1) {
-//        g==2;
-//        if (g==3) {
-//            break;
-//        }
-//        if (g==4) {
-//            continue;
-//        }
-//        break;
-//    }
-//    g==5;
-//}
+void complicated_while() {
+    while (g==1) {
+        g==2;
+        if (g==3) {
+            break;
+        }
+        if (g==4) {
+            continue;
+        }
+        break;
+    }
+    g==5;
+}
+
+void nested_while() {
+    while (g==1) {
+        if (g==2) {
+            break;
+        }
+        while(g==10) {
+            if (g==3) {
+                break;
+            }
+            if (g==4) {
+                continue;
+            }
+        }
+        if (g==5) {
+            continue;
+        }
+    }
+}
 
 int main() {
     int a;
