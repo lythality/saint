@@ -22,6 +22,9 @@ def check_goto(checker, functions):
         # 15.2 - goto label only appear upper block
         check_goto_label_only_appear_upper_block(f.function_decl, [])
 
+        # 15.7 - all if has else
+        check_existence_of_else(f.function_decl, [])
+
 
 def find_and_report_goto_usage(n):
     # report goto usage
@@ -50,3 +53,28 @@ def check_goto_label_only_appear_upper_block(n, found_labels):
     # iterate recursively
     for c in n.get_children():
         check_goto_label_only_appear_upper_block(c, found_labels)
+
+
+def check_existence_of_else(n, found_labels):
+    IF_CONDITION = 0
+    IF_TRUE_STATEMENT = 1
+    IF_FALSE_STATEMENT = 2
+    IF_FULLY_ITERATED = 3
+
+    # <state_machine> check existence of else
+    if n.kind == CursorKind.IF_STMT:
+        state = IF_CONDITION
+        for c in n.get_children():
+            if state == IF_CONDITION:
+                state = IF_TRUE_STATEMENT
+            elif state == IF_TRUE_STATEMENT:
+                state = IF_FALSE_STATEMENT
+            elif state == IF_FALSE_STATEMENT:
+                state = IF_FULLY_ITERATED
+        print(state)
+        if state != IF_FULLY_ITERATED:
+            rule_checker.add_violation(Violation(15, 7, getTokenString(n)))
+
+    # iterate recursively
+    for c in n.get_children():
+        check_existence_of_else(c, found_labels)

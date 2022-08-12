@@ -31,6 +31,8 @@ class Violation:
                 message = "goto (%s) is used" % self.supplementary
             if self.sub_id == 2:
                 message = "jump to nested label from goto: %s" % self.supplementary
+            if self.sub_id == 7:
+                message = "all if shall have else statement: %s" % self.supplementary
 
         return "(%d,%d) %s" % (self.rule_id, self.sub_id, message)
 
