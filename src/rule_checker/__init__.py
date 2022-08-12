@@ -335,6 +335,9 @@ class RuleChecker(SWorkspace):
                                           self.var_decl))
         check_array_init(self, internal_array_vars)
 
+        # checking rule 15.* - goto check
+        check_goto(self, self.function)
+
         # checking rule 17.1 - don't include stdarg.h
         for t_unit in self.translation_unit:
             if "#include<stdarg.h" in getTokenString(t_unit):
