@@ -51,7 +51,7 @@ class Test(TestCase):
     def test_goto_15_1(self):
         violations = get_violations('../test_res/test_goto_15_1.c')
 
-        if len(violations) != 2:
+        if len(violations) < 2:
             self.fail("missing violation")
 
         for vio in violations:
@@ -67,7 +67,7 @@ class Test(TestCase):
     def test_goto_15_3(self):
         violations = get_violations('../test_res/test_goto_15_3.c')
 
-        if len(violations) != 6:
+        if len(violations) < 6:
             self.fail("missing violation")
 
         for vio in violations:
