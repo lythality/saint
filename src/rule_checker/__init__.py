@@ -10,6 +10,7 @@ import re
 
 from rule_checker.array_init_check import check_array_init, is_array, get_array_size_list
 from rule_checker.goto_check import check_goto
+from rule_checker.violation import Violation
 
 
 ARCHITECTURE_BITS = 16
@@ -313,15 +314,18 @@ class RuleChecker(SWorkspace):
                 enum_const_text = getTokenString(c)
                 if "=" in enum_const_text:
                     enum_name = enum_const_text.split("=")[0]
-                    enum_value = int(enum_const_text.split("=")[1])
-                    enum_dict_explicit[enum_name] = enum_value
+                    enum_value = enum_const_text.split("=")[1]
+                    if enum_value == "true":
+                        enum_value = 1
+                    elif enum_value == "false":
+                        enum_value = 0
+                    enum_dict_explicit[enum_name] = int(enum_value)
                 else:
                     enum_name = enum_const_text
                     enum_value = enum_prev_value+1
                     enum_dict_implicit[enum_name] = enum_value
                 enum_prev_value = enum_value
             for key_ex, value_ex in enum_dict_explicit.items():
-                print(key_ex)
                 for key_im, value_im in enum_dict_implicit.items():
                     if value_ex == value_im:
                         print(" > enum contains duplicated constant for "+key_ex+" = "+key_im+" = "+str(value_im))
@@ -331,5 +335,7 @@ class RuleChecker(SWorkspace):
                                           self.var_decl))
         check_array_init(self, internal_array_vars)
 
-        # checking rule 15.* - goto check
-        check_goto(self, self.function)
+        # checking rule 17.1 - don't include stdarg.h
+        for t_unit in self.translation_unit:
+            if "#include<stdarg.h" in getTokenString(t_unit):
+                self.add_violation(Violation(17, 1, n.spelling))

@@ -1,4 +1,5 @@
 #include <stdbool.h>
+#include <stdarg.h>
 
 typedef struct _A {
     int             a: 1;

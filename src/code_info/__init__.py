@@ -11,6 +11,7 @@ class SWorkspace:
     def __init__(self):
         self.source_files = []
 
+        self.translation_unit = []
         self.integer_literal = []
         self.character_literal = []
         self.string_literal = []
@@ -27,6 +28,7 @@ class SWorkspace:
         for t_unit in self.source_files:
             t_unit.start_trav()
 
+            self.translation_unit.extend(t_unit.translation_unit)
             self.integer_literal.extend(t_unit.integer_literal)
             self.character_literal.extend(t_unit.character_literal)
             self.string_literal.extend(t_unit.string_literal)
@@ -47,6 +49,7 @@ class STranslationUnit:
     def __init__(self, cfile):
         self.cfile = cfile
 
+        self.translation_unit = []
         self.integer_literal = []
         self.character_literal = []
         self.string_literal = []
@@ -81,7 +84,9 @@ class STranslationUnit:
         self.print_info(n, i)
 
         var_names_inside_comp_stmt = []
-        if n.kind == CursorKind.COMPOUND_STMT:
+        if n.kind == CursorKind.TRANSLATION_UNIT:
+            self.translation_unit.append(n)
+        elif n.kind == CursorKind.COMPOUND_STMT:
             self.hook_enter_comp_stmt(n, var_names_inside_comp_stmt)
         elif n.kind == CursorKind.INTEGER_LITERAL:
             self.integer_literal.append(n)
