@@ -80,6 +80,14 @@ void nested_while() {
     }
 }
 
+int switch_000() {
+    switch(g) {
+    case 1:
+        break;
+    default:
+    }
+}
+
 int main() {
     int a;
 

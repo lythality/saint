@@ -192,6 +192,21 @@ class Test(TestCase):
 35 [3] COMP-END-{if(g==2){break;}while(g==10){if(g==3){break;}if(g==4){continue;}}if(g==5){continue;}}
 36 [37] COMP-END-{while(g==1){if(g==2){break;}while(g==10){if(g==3){break;}if(g==4){continue;}}if(g==5){continue;}}}
 37 [] EXIT_node
+''', '''=== switch_000 ===
+0 [1] INIT_node
+1 [2] COMP-START-{switch(g){case1:break;default:}}
+2 [4] switch(g){case1:break;default:}
+3 [12] MERGE-switch(g){case1:break;default:}
+4 [5] COMP-START-{case1:break;default:}
+5 [7, 6] case1:break
+6 [8] MERGE-case1:break
+7 [3] break
+8 [10] default:
+9 [11] MERGE-default:
+10 [9] emptystatement
+11 [3] COMP-END-{case1:break;default:}
+12 [13] COMP-END-{switch(g){case1:break;default:}}
+13 [] EXIT_node
 ''', '''=== main ===
 0 [1] INIT_node
 1 [2] COMP-START-{inta;a=3+4+5+6+7;if(a==3){}elseif(a==4){}return0;}
@@ -210,8 +225,7 @@ class Test(TestCase):
 14 [15] COMP-END-{inta;a=3+4+5+6+7;if(a==3){}elseif(a==4){}return0;}
 15 [] EXIT_node
 ''']
-        print(cfg_infos)
+        for cfg in cfg_infos:
+            print(cfg)
         for cfg in oracle:
             self.assertTrue(cfg in cfg_infos, "missing cfg: "+cfg)
-
-

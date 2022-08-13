@@ -1,3 +1,12 @@
+int g = 0;
+
+int switch_000() {
+    switch(g) {
+    case 1:
+        break;
+    default:
+    }
+}
 
 int switch_001() {
     int b=3;

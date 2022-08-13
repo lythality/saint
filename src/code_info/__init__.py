@@ -144,7 +144,7 @@ class Function:
         self.node_map = {}
         self.control_flow = {}
         self.node_size = 0
-        # self._construct_control_flow()
+        self._construct_control_flow()
 
     def _construct_control_flow(self):
         init_node_id = self._get_new_node(DummyNode("INIT_node"))
@@ -234,6 +234,63 @@ class Function:
             for cont_node_id in while_continues:
                 self._connect(cont_node_id, merge_node_id)
             return curr_node_id, while_next_node_id
+        elif curr_node.kind == CursorKind.SWITCH_STMT:
+            curr_node_id = self._get_new_node(curr_node)
+            merge_node_id = self._get_new_node(DummyNode("MERGE-"+getTokenString(curr_node)))
+
+            case_breaks = []
+
+            CASE_CONDITION = 0
+            CASE_BODY = 1
+            CASE_FULLY_ITERATED = 2
+            state = CASE_CONDITION
+            for c in curr_node.get_children():
+                if state == CASE_CONDITION:
+                    state = CASE_BODY
+                    continue
+                elif state == CASE_BODY:
+                    start_node_id, end_node_id = self._construct_control_flow_common(c, case_breaks, o_cont_node_ids)
+                    self._connect(curr_node_id, start_node_id)
+                    self._connect(end_node_id, merge_node_id)
+                    state = CASE_FULLY_ITERATED
+            for break_node_id in case_breaks:
+                self._connect(break_node_id, merge_node_id)
+            return curr_node_id, merge_node_id
+        elif curr_node.kind == CursorKind.CASE_STMT:
+            curr_node_id = self._get_new_node(curr_node)
+            merge_node_id = self._get_new_node(DummyNode("MERGE-"+getTokenString(curr_node)))
+
+            CASE_CONDITION = 0
+            CASE_BODY = 1
+            CASE_FULLY_ITERATED = 2
+            state = CASE_CONDITION
+            for c in curr_node.get_children():
+                if state == CASE_CONDITION:
+                    state = CASE_BODY
+                    continue
+                elif state == CASE_BODY:
+                    start_node_id, end_node_id = self._construct_control_flow_common(c, o_break_node_ids,
+                                                                                     o_cont_node_ids)
+                    self._connect(curr_node_id, start_node_id)
+                    self._connect(end_node_id, merge_node_id)
+                    state = CASE_FULLY_ITERATED
+            self._connect(curr_node_id, merge_node_id)
+            return curr_node_id, merge_node_id
+        elif curr_node.kind == CursorKind.DEFAULT_STMT:
+            curr_node_id = self._get_new_node(curr_node)
+            merge_node_id = self._get_new_node(DummyNode("MERGE-"+getTokenString(curr_node)))
+
+            DEFAULT_BODY = 0
+            DEFAULT_FULLY_ITERATED = 1
+            state = DEFAULT_BODY
+            for c in curr_node.get_children():
+                if state == DEFAULT_BODY:
+                    start_node_id, end_node_id = self._construct_control_flow_common(c, o_break_node_ids,
+                                                                                     o_cont_node_ids)
+                    self._connect(curr_node_id, start_node_id)
+                    self._connect(end_node_id, merge_node_id)
+                    state = DEFAULT_FULLY_ITERATED
+            return curr_node_id, merge_node_id
         elif curr_node.kind == CursorKind.BREAK_STMT:
             curr_node_id = self._get_new_node(curr_node)
             o_break_node_ids.append(curr_node_id)
@@ -246,6 +303,9 @@ class Function:
                 or curr_node.kind == CursorKind.DECL_STMT \
                 or curr_node.kind == CursorKind.RETURN_STMT:
             curr_node_id = self._get_new_node(curr_node)
+            return curr_node_id, curr_node_id
+        elif curr_node.kind == CursorKind.NULL_STMT:
+            curr_node_id = self._get_new_node(DummyNode("empty statement"))
             return curr_node_id, curr_node_id
 
         # not matched any
