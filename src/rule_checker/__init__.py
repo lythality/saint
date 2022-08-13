@@ -4,20 +4,17 @@ import clang.cindex
 from clang.cindex import TypeKind, CursorKind
 
 from code_info import SWorkspace
+from code_info.util import getTokenString
 
 import re
 
+from rule_checker.array_init_check import check_array_init, is_array, get_array_size_list
+from rule_checker.goto_check import check_goto
+from rule_checker.switch_check import check_switch
+from rule_checker.violation import Violation
+
 
 ARCHITECTURE_BITS = 16
-
-
-def getTokenString(n):
-    if n is None:
-        return "NONE"
-    ret = ""
-    for token in n.get_tokens():
-        ret += token.spelling
-    return ret
 
 
 def isConstCharType(n):
@@ -122,42 +119,18 @@ def get_dict_from_list(my_list):
     return new_dict
 
 
-def is_array(n:CursorKind):
-    return "[" in n.type.spelling
-
-
-# array size is a list as there are more than one size for n-array
-def get_array_size_list(n: CursorKind):
-    if not is_array(n):
-        return None
-    ret = []
-    for c in n.get_children():
-        if c.kind == CursorKind.INTEGER_LITERAL:
-            ret.append(int(getTokenString(c)))
-    return ret
-
-
-def parse_array_initializer(n: CursorKind):
-    if n.kind != CursorKind.INIT_LIST_EXPR:
-        return n.spelling
-
-    ret = []
-    for c in n.get_children():
-        ret.append(parse_array_initializer(c))
-    return ret
-
-
-def get_array_initializer(n: CursorKind):
-    if not is_array(n):
-        return None
-
-    for c in n.get_children():
-        if c.kind == CursorKind.INIT_LIST_EXPR:
-            return parse_array_initializer(c)
-
-    return None
-
 class RuleChecker(SWorkspace):
+
+    def __init__(self):
+        super().__init__()
+        self.violations = []
+
+    def add_violation(self, vio):
+        self.violations.append(vio)
+
+    def print_violations(self):
+        for vio in self.violations:
+            vio.print()
 
     def hook_enter_comp_stmt(self, n: CursorKind, var_names_inside_comp_stmt):
         global var_names_scope
@@ -342,47 +315,34 @@ class RuleChecker(SWorkspace):
                 enum_const_text = getTokenString(c)
                 if "=" in enum_const_text:
                     enum_name = enum_const_text.split("=")[0]
-                    enum_value = int(enum_const_text.split("=")[1])
-                    enum_dict_explicit[enum_name] = enum_value
+                    enum_value = enum_const_text.split("=")[1]
+                    if enum_value == "true":
+                        enum_value = 1
+                    elif enum_value == "false":
+                        enum_value = 0
+                    enum_dict_explicit[enum_name] = int(enum_value)
                 else:
                     enum_name = enum_const_text
                     enum_value = enum_prev_value+1
                     enum_dict_implicit[enum_name] = enum_value
                 enum_prev_value = enum_value
             for key_ex, value_ex in enum_dict_explicit.items():
-                print(key_ex)
                 for key_im, value_im in enum_dict_implicit.items():
                     if value_ex == value_im:
                         print(" > enum contains duplicated constant for "+key_ex+" = "+key_im+" = "+str(value_im))
 
-        # checking rule 9.3 - array partial define
-        for n in self.var_decl:
-            if not is_array(n) or getTokenString(n).startswith("extern"):
-                continue
-            dimension = n.type.spelling.count("[")
-            arr_size_list = list(reversed(get_array_size_list(n)))
-            if dimension != len(arr_size_list):
-                # handled on rule 8.11
-                continue
+        # checking rule 9.[2,3,4,5] - array init check
+        internal_array_vars = list(filter(lambda v: is_array(v) and not getTokenString(v).startswith("extern"),
+                                          self.var_decl))
+        check_array_init(self, internal_array_vars)
 
-            if not check_arr_size(get_array_initializer(n), arr_size_list, 0):
-                print(" > array is not fully defined: "+n.spelling)
+        # checking rule 15.* - goto check
+        check_goto(self, self.function)
 
+        # checking rule 16.* - switch check
+        check_switch(self, self.function)
 
-def check_arr_size(component, arr_size_list, idx):
-    if idx >= len(arr_size_list):
-        return True
-
-    # not defined item found
-    if component is None:
-        return False
-
-    if len(component) != arr_size_list[idx]:
-        return False
-
-    for element in component:
-        if not check_arr_size(element, arr_size_list, idx+1):
-            return False
-    return True
-
-
+        # checking rule 17.1 - don't include stdarg.h
+        for t_unit in self.translation_unit:
+            if "#include<stdarg.h" in getTokenString(t_unit):
+                self.add_violation(Violation(17, 1, n.spelling))
