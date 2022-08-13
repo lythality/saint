@@ -23,7 +23,6 @@ int switch_001() {
         }
     case 6:
         break;
-    default:
     }
 }
 

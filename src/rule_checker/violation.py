@@ -29,14 +29,16 @@ class Violation:
         elif self.rule_id == 15:
             if self.sub_id == 1:
                 message = "goto (%s) is used" % self.supplementary
-            if self.sub_id == 2:
+            elif self.sub_id == 2:
                 message = "jump to nested label from goto: %s" % self.supplementary
-            if self.sub_id == 7:
+            elif self.sub_id == 7:
                 message = "all if shall have else statement: %s" % self.supplementary
 
         elif self.rule_id == 16:
             if self.sub_id == 2:
                 message = "case is not directly connected to switch: %s" % self.supplementary
+            elif self.sub_id == 4:
+                message = "default is not placed in switch: %s" % self.supplementary
 
         elif self.rule_id == 17:
             if self.sub_id == 1:

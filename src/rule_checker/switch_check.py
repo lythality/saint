@@ -19,6 +19,10 @@ def check_switch(checker, functions):
         for c in f.function_decl.get_children():
             check_case_used_below_switch(c, [])
 
+        # 16.4 - all switch shall have default
+        for c in f.function_decl.get_children():
+            check_default_for_switch(c)
+
 
 def check_case_used_below_switch(n, parent_stack):
     # report violation
@@ -50,3 +54,26 @@ def check_case_used_below_switch(n, parent_stack):
     for c in n.get_children():
         check_case_used_below_switch(c, parent_stack)
     parent_stack.pop()
+
+
+def check_default_for_switch(n):
+    # report violation
+    if n.kind == CursorKind.SWITCH_STMT:
+        if not has_default(n):
+            rule_checker.add_violation(Violation(16, 4, getTokenString(n)))
+
+    # iterate recursively
+    for c in n.get_children():
+        check_default_for_switch(c)
+
+
+def has_default(n):
+    # return true if it is default statement
+    if n.kind == CursorKind.DEFAULT_STMT:
+        return True
+
+    # iterate recursively
+    for c in n.get_children():
+        if has_default(c):
+            return True
+    return False
