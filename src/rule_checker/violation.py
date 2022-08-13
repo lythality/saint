@@ -34,6 +34,10 @@ class Violation:
             if self.sub_id == 7:
                 message = "all if shall have else statement: %s" % self.supplementary
 
+        elif self.rule_id == 16:
+            if self.sub_id == 2:
+                message = "case is not directly connected to switch: %s" % self.supplementary
+
         elif self.rule_id == 17:
             if self.sub_id == 1:
                 message = "stdarg.h is included in: %s" % self.supplementary

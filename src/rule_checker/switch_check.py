@@ -14,67 +14,39 @@ def check_switch(checker, functions):
     global rule_checker
     rule_checker = checker
 
-    # checking rule 15.* - goto check
     for f in functions:
-        # 15.1 - goto is used
-        find_and_report_goto_usage(f.function_decl)
-
-        # 15.2 - goto label only appear upper block
-        check_goto_label_only_appear_upper_block(f.function_decl, [])
-
-        # 15.7 - all if has else
-        check_existence_of_else(f.function_decl, [])
+        # 16.2 - case shall used immediately below switch
+        for c in f.function_decl.get_children():
+            check_case_used_below_switch(c, [])
 
 
-def find_and_report_goto_usage(n):
-    # report goto usage
-    if n.kind == CursorKind.GOTO_STMT:
-        rule_checker.add_violation(Violation(15, 1, getTokenString(n)))
+def check_case_used_below_switch(n, parent_stack):
+    # report violation
+    if n.kind == CursorKind.CASE_STMT:
+        switch_parents = []
 
-    # iterate recursively
-    for c in n.get_children():
-        find_and_report_goto_usage(c)
+        while parent_stack:
+            parent = parent_stack.pop()
+            switch_parents.append(parent)
 
+            if parent.kind == CursorKind.SWITCH_STMT:
+                # good
+                break
+            elif parent.kind == CursorKind.COMPOUND_STMT:
+                # try one more time
+                continue
+            elif parent.kind == CursorKind.CASE_STMT:
+                # try one more time
+                continue
+            else:
+                rule_checker.add_violation(Violation(16, 2, getTokenString(n)))
+                break
 
-def check_goto_label_only_appear_upper_block(n, found_labels):
-    # identify found labels
-    for c in n.get_children():
-        if c.kind == CursorKind.LABEL_STMT:
-            goto_name = c.spelling
-            found_labels.append(goto_name)
-
-    # report jump to an un-found label
-    for c in n.get_children():
-        if c.kind == CursorKind.GOTO_STMT:
-            goto_name = getTokenString(c).removeprefix("goto")
-            if goto_name not in found_labels:
-                rule_checker.add_violation(Violation(15, 3, "%s @ %d:%d" % (goto_name, c.location.line, c.location.column)))
+        while switch_parents:
+            parent_stack.append(switch_parents.pop())
 
     # iterate recursively
+    parent_stack.append(n)
     for c in n.get_children():
-        check_goto_label_only_appear_upper_block(c, found_labels)
-
-
-def check_existence_of_else(n, found_labels):
-    IF_CONDITION = 0
-    IF_TRUE_STATEMENT = 1
-    IF_FALSE_STATEMENT = 2
-    IF_FULLY_ITERATED = 3
-
-    # <state_machine> check existence of else
-    if n.kind == CursorKind.IF_STMT:
-        state = IF_CONDITION
-        for c in n.get_children():
-            if state == IF_CONDITION:
-                state = IF_TRUE_STATEMENT
-            elif state == IF_TRUE_STATEMENT:
-                state = IF_FALSE_STATEMENT
-            elif state == IF_FALSE_STATEMENT:
-                state = IF_FULLY_ITERATED
-        print(state)
-        if state != IF_FULLY_ITERATED:
-            rule_checker.add_violation(Violation(15, 7, getTokenString(n)))
-
-    # iterate recursively
-    for c in n.get_children():
-        check_existence_of_else(c, found_labels)
+        check_case_used_below_switch(c, parent_stack)
+    parent_stack.pop()
