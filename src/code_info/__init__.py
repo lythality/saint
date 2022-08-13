@@ -1,6 +1,7 @@
 import clang.cindex
 from clang.cindex import TypeKind, CursorKind, TokenKind
 
+from code_info.cursor_util import get_if_body, get_else_body, get_while_body, get_switch_body, get_case_body, get_default_body
 from code_info.util import getTokenString
 
 clang.cindex.Config.set_library_file('C:/Program Files/LLVM/bin/libclang.dll')
@@ -200,30 +201,22 @@ class Function:
         elif curr_node.kind == CursorKind.IF_STMT:
             curr_node_id = self._get_new_node(curr_node)
             merge_node_id = self._get_new_node(DummyNode("MERGE-"+getTokenString(curr_node)))
-            IF_CONDITION = 0
-            IF_TRUE_STATEMENT = 1
-            IF_FALSE_STATEMENT = 2
-            IF_FULLY_ITERATED = 3
-            state = IF_CONDITION
-            for c in curr_node.get_children():
-                if state == IF_CONDITION:
-                    state = IF_TRUE_STATEMENT
-                    continue
-                elif state == IF_TRUE_STATEMENT:
-                    start_node_id, end_node_id = self._construct_control_flow_common(c, o_break_node_ids, o_cont_node_ids, o_goto_node_ids, o_label_node_ids)
-                    self._connect(curr_node_id, start_node_id)
-                    self._connect(end_node_id, merge_node_id)
-                    state = IF_FALSE_STATEMENT
-                elif state == IF_FALSE_STATEMENT:
-                    start_node_id, end_node_id = self._construct_control_flow_common(c, o_break_node_ids, o_cont_node_ids, o_goto_node_ids, o_label_node_ids)
-                    self._connect(curr_node_id, start_node_id)
-                    self._connect(end_node_id, merge_node_id)
-                    state = IF_FULLY_ITERATED
 
-            if state != IF_FULLY_ITERATED:
+            if_body_node = get_if_body(curr_node)
+            start_node_id, end_node_id = self._construct_control_flow_common(if_body_node, o_break_node_ids, o_cont_node_ids, o_goto_node_ids, o_label_node_ids)
+            self._connect(curr_node_id, start_node_id)
+            self._connect(end_node_id, merge_node_id)
+
+            else_body_node = get_else_body(curr_node)
+            if else_body_node is not None:
+                start_node_id, end_node_id = self._construct_control_flow_common(else_body_node, o_break_node_ids, o_cont_node_ids, o_goto_node_ids, o_label_node_ids)
+                self._connect(curr_node_id, start_node_id)
+                self._connect(end_node_id, merge_node_id)
+            else:
                 dummy_else_node_id = self._get_new_node(DummyNode("EMPTY ELSE-" + getTokenString(curr_node)))
                 self._connect(curr_node_id, dummy_else_node_id)
                 self._connect(dummy_else_node_id, merge_node_id)
+
             return curr_node_id, merge_node_id
         elif curr_node.kind == CursorKind.WHILE_STMT:
             curr_node_id = self._get_new_node(curr_node)
@@ -233,19 +226,12 @@ class Function:
             while_breaks = []
             while_continues = []
 
-            WHILE_CONDITION = 0
-            WHILE_BODY = 1
-            WHILE_FULLY_ITERATED = 2
-            state = WHILE_CONDITION
-            for c in curr_node.get_children():
-                if state == WHILE_CONDITION:
-                    state = WHILE_BODY
-                    continue
-                elif state == WHILE_BODY:
-                    start_node_id, end_node_id = self._construct_control_flow_common(c, while_breaks, while_continues, o_goto_node_ids, o_label_node_ids)
-                    self._connect(curr_node_id, start_node_id)
-                    self._connect(end_node_id, merge_node_id)
-                    state = WHILE_FULLY_ITERATED
+            while_body = get_while_body(curr_node)
+
+            start_node_id, end_node_id = self._construct_control_flow_common(while_body, while_breaks, while_continues, o_goto_node_ids, o_label_node_ids)
+            self._connect(curr_node_id, start_node_id)
+            self._connect(end_node_id, merge_node_id)
+
             self._connect(merge_node_id, curr_node_id)
             self._connect(curr_node_id, while_next_node_id)
             for break_node_id in while_breaks:
@@ -257,58 +243,41 @@ class Function:
             curr_node_id = self._get_new_node(curr_node)
             merge_node_id = self._get_new_node(DummyNode("MERGE-"+getTokenString(curr_node)))
 
-            case_breaks = []
+            switch_breaks = []
 
-            CASE_CONDITION = 0
-            CASE_BODY = 1
-            CASE_FULLY_ITERATED = 2
-            state = CASE_CONDITION
-            for c in curr_node.get_children():
-                if state == CASE_CONDITION:
-                    state = CASE_BODY
-                    continue
-                elif state == CASE_BODY:
-                    start_node_id, end_node_id = self._construct_control_flow_common(c, case_breaks, o_cont_node_ids, o_goto_node_ids, o_label_node_ids)
-                    self._connect(curr_node_id, start_node_id)
-                    self._connect(end_node_id, merge_node_id)
-                    state = CASE_FULLY_ITERATED
-            for break_node_id in case_breaks:
+            switch_body = get_switch_body(curr_node)
+
+            start_node_id, end_node_id = self._construct_control_flow_common(switch_body, switch_breaks, o_cont_node_ids, o_goto_node_ids, o_label_node_ids)
+            self._connect(curr_node_id, start_node_id)
+            self._connect(end_node_id, merge_node_id)
+
+            for break_node_id in switch_breaks:
                 self._connect(break_node_id, merge_node_id)
             return curr_node_id, merge_node_id
         elif curr_node.kind == CursorKind.CASE_STMT:
             curr_node_id = self._get_new_node(curr_node)
             merge_node_id = self._get_new_node(DummyNode("MERGE-"+getTokenString(curr_node)))
 
-            CASE_CONDITION = 0
-            CASE_BODY = 1
-            CASE_FULLY_ITERATED = 2
-            state = CASE_CONDITION
-            for c in curr_node.get_children():
-                if state == CASE_CONDITION:
-                    state = CASE_BODY
-                    continue
-                elif state == CASE_BODY:
-                    start_node_id, end_node_id = self._construct_control_flow_common(c, o_break_node_ids,
-                                                                                     o_cont_node_ids, o_goto_node_ids, o_label_node_ids)
-                    self._connect(curr_node_id, start_node_id)
-                    self._connect(end_node_id, merge_node_id)
-                    state = CASE_FULLY_ITERATED
+            case_body = get_case_body(curr_node)
+
+            start_node_id, end_node_id = self._construct_control_flow_common(case_body, o_break_node_ids,
+                                                                             o_cont_node_ids, o_goto_node_ids, o_label_node_ids)
+            self._connect(curr_node_id, start_node_id)
+            self._connect(end_node_id, merge_node_id)
+
             self._connect(curr_node_id, merge_node_id)
             return curr_node_id, merge_node_id
         elif curr_node.kind == CursorKind.DEFAULT_STMT:
             curr_node_id = self._get_new_node(curr_node)
             merge_node_id = self._get_new_node(DummyNode("MERGE-"+getTokenString(curr_node)))
 
-            DEFAULT_BODY = 0
-            DEFAULT_FULLY_ITERATED = 1
-            state = DEFAULT_BODY
-            for c in curr_node.get_children():
-                if state == DEFAULT_BODY:
-                    start_node_id, end_node_id = self._construct_control_flow_common(c, o_break_node_ids,
-                                                                                     o_cont_node_ids, o_goto_node_ids, o_label_node_ids)
-                    self._connect(curr_node_id, start_node_id)
-                    self._connect(end_node_id, merge_node_id)
-                    state = DEFAULT_FULLY_ITERATED
+            default_body = get_default_body(curr_node)
+
+            start_node_id, end_node_id = self._construct_control_flow_common(default_body, o_break_node_ids,
+                                                                             o_cont_node_ids, o_goto_node_ids, o_label_node_ids)
+            self._connect(curr_node_id, start_node_id)
+            self._connect(end_node_id, merge_node_id)
+
             return curr_node_id, merge_node_id
         elif curr_node.kind == CursorKind.BREAK_STMT:
             curr_node_id = self._get_new_node(curr_node)
