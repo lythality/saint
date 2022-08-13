@@ -2,6 +2,7 @@ import re
 
 from clang.cindex import CursorKind
 
+from code_info.cursor_util import get_default_body
 from code_info.util import getTokenString
 
 from rule_checker.violation import Violation
@@ -59,21 +60,9 @@ def check_case_used_below_switch(n, parent_stack):
 def check_default_for_switch(n):
     # report violation
     if n.kind == CursorKind.SWITCH_STMT:
-        if not has_default(n):
+        if get_default_body(n) is None:
             rule_checker.add_violation(Violation(16, 4, getTokenString(n)))
 
     # iterate recursively
     for c in n.get_children():
         check_default_for_switch(c)
-
-
-def has_default(n):
-    # return true if it is default statement
-    if n.kind == CursorKind.DEFAULT_STMT:
-        return True
-
-    # iterate recursively
-    for c in n.get_children():
-        if has_default(c):
-            return True
-    return False

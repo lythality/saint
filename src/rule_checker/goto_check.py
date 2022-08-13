@@ -2,6 +2,7 @@ import re
 
 from clang.cindex import CursorKind
 
+from code_info.cursor_util import get_if_body, get_else_body, get_while_body, get_switch_body, get_case_body, get_default_body
 from code_info.util import getTokenString
 
 from rule_checker.violation import Violation
@@ -56,24 +57,9 @@ def check_goto_label_only_appear_upper_block(n, found_labels):
 
 
 def check_existence_of_else(n, found_labels):
-    IF_CONDITION = 0
-    IF_TRUE_STATEMENT = 1
-    IF_FALSE_STATEMENT = 2
-    IF_FULLY_ITERATED = 3
-
-    # <state_machine> check existence of else
-    if n.kind == CursorKind.IF_STMT:
-        state = IF_CONDITION
-        for c in n.get_children():
-            if state == IF_CONDITION:
-                state = IF_TRUE_STATEMENT
-            elif state == IF_TRUE_STATEMENT:
-                state = IF_FALSE_STATEMENT
-            elif state == IF_FALSE_STATEMENT:
-                state = IF_FULLY_ITERATED
-        print(state)
-        if state != IF_FULLY_ITERATED:
-            rule_checker.add_violation(Violation(15, 7, getTokenString(n)))
+    # report if there are no else body
+    if get_else_body(n) is None:
+        rule_checker.add_violation(Violation(15, 7, getTokenString(n)))
 
     # iterate recursively
     for c in n.get_children():
