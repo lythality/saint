@@ -14,19 +14,21 @@ class CFG:
         self.node_map = {}
         self.control_flow = {}
         self.node_size = 0
+        self.init_node_id = -1
 
     def initialize(self):
         self.func_name = ""
         self.node_map = {}
         self.control_flow = {}
         self.node_size = 0
+        self.init_node_id = -1
 
     def construct_cfg_by_clang_func_decl(self, function_decl):
         self.initialize()
 
         self.func_name = function_decl.spelling
 
-        init_node_id = self._get_new_node(DummyNode("INIT_node"))
+        self.init_node_id = self._get_new_node(DummyNode("INIT_node"))
         # There are at most one statement in function decl (mostly compound statement)
         # assert(len([i for i in self.function_decl.get_children()]) == 1)
         for c in function_decl.get_children():
@@ -39,7 +41,7 @@ class CFG:
             label_node_ids = []
             start_node_id, end_node_id = self._construct_control_flow_common(c, [], [], goto_node_ids, label_node_ids)
             exit_node_id = self._get_new_node(DummyNode("EXIT_node"))
-            self._connect(init_node_id, start_node_id)
+            self._connect(self.init_node_id, start_node_id)
             self._connect(end_node_id, exit_node_id)
 
             # handle goto->label
