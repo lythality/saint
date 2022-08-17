@@ -10,6 +10,7 @@ import re
 
 from rule_checker.array_init_check import check_array_init, is_array, get_array_size_list
 from rule_checker.goto_check import check_goto
+from rule_checker.cfg_check import check_cfg
 from rule_checker.switch_check import check_switch
 from rule_checker.violation import Violation
 
@@ -338,6 +339,9 @@ class RuleChecker(SWorkspace):
 
         # checking rule 15.* - goto check
         check_goto(self, self.function)
+
+        # checking rules for cfg
+        check_cfg(self, self.function)
 
         # checking rule 16.* - switch check
         check_switch(self, self.function)

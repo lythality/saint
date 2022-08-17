@@ -221,7 +221,7 @@ class Test(TestCase):
 10 [11] COMP-START-{}
 11 [9] COMP-END-{}
 12 [9] EMPTYELSE-if(a==4){}
-13 [14] return0
+13 [15] return0
 14 [15] COMP-END-{inta;a=3+4+5+6+7;if(a==3){}elseif(a==4){}return0;}
 15 [] EXIT_node
 ''']

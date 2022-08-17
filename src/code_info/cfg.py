@@ -15,6 +15,7 @@ class CFG:
         self.control_flow = {}
         self.node_size = 0
         self.init_node_id = -1
+        self.exit_node_id = -1
 
     def initialize(self):
         self.func_name = ""
@@ -22,6 +23,10 @@ class CFG:
         self.control_flow = {}
         self.node_size = 0
         self.init_node_id = -1
+        self.exit_node_id = -1
+
+    def next(self, curr_node_id) -> []:
+        return self.control_flow[curr_node_id]
 
     def construct_cfg_by_clang_func_decl(self, function_decl):
         self.initialize()
@@ -39,10 +44,15 @@ class CFG:
             # body iteration
             goto_node_ids = []
             label_node_ids = []
-            start_node_id, end_node_id = self._construct_control_flow_common(c, [], [], goto_node_ids, label_node_ids)
-            exit_node_id = self._get_new_node(DummyNode("EXIT_node"))
+            return_node_ids = []
+            start_node_id, end_node_id = self._construct_control_flow_common(c, [], [], goto_node_ids, label_node_ids, return_node_ids)
+            self.exit_node_id = self._get_new_node(DummyNode("EXIT_node"))
             self._connect(self.init_node_id, start_node_id)
-            self._connect(end_node_id, exit_node_id)
+            self._connect(end_node_id, self.exit_node_id)
+
+            # handle return->eixt
+            for return_node_id in return_node_ids:
+                self._connect(return_node_id, self.exit_node_id)
 
             # handle goto->label
             for goto_node_id in goto_node_ids:
@@ -65,13 +75,13 @@ class CFG:
     # We do not just passing callers parameter down to callee
     # Always, parent connect start and end nodes
     # return: tuple of (start_node, end_node) of the block
-    def _construct_control_flow_common(self, curr_node, o_break_node_ids, o_cont_node_ids, o_goto_node_ids, o_label_node_ids):
+    def _construct_control_flow_common(self, curr_node, o_break_node_ids, o_cont_node_ids, o_goto_node_ids, o_label_node_ids, o_return_node_ids):
         if curr_node.kind == CursorKind.COMPOUND_STMT:
             comp_start_node_id = self._get_new_node(DummyNode("COMP-START-"+getTokenString(curr_node)))
             before_node_id = comp_start_node_id
 
             for c in curr_node.get_children():
-                start_node_id, end_node_id = self._construct_control_flow_common(c, o_break_node_ids, o_cont_node_ids, o_goto_node_ids, o_label_node_ids)
+                start_node_id, end_node_id = self._construct_control_flow_common(c, o_break_node_ids, o_cont_node_ids, o_goto_node_ids, o_label_node_ids, o_return_node_ids)
                 self._connect(before_node_id, start_node_id)
                 before_node_id = end_node_id
 
@@ -83,13 +93,13 @@ class CFG:
             merge_node_id = self._get_new_node(DummyNode("MERGE-"+getTokenString(curr_node)))
 
             if_body_node = get_if_body(curr_node)
-            start_node_id, end_node_id = self._construct_control_flow_common(if_body_node, o_break_node_ids, o_cont_node_ids, o_goto_node_ids, o_label_node_ids)
+            start_node_id, end_node_id = self._construct_control_flow_common(if_body_node, o_break_node_ids, o_cont_node_ids, o_goto_node_ids, o_label_node_ids, o_return_node_ids)
             self._connect(curr_node_id, start_node_id)
             self._connect(end_node_id, merge_node_id)
 
             else_body_node = get_else_body(curr_node)
             if else_body_node is not None:
-                start_node_id, end_node_id = self._construct_control_flow_common(else_body_node, o_break_node_ids, o_cont_node_ids, o_goto_node_ids, o_label_node_ids)
+                start_node_id, end_node_id = self._construct_control_flow_common(else_body_node, o_break_node_ids, o_cont_node_ids, o_goto_node_ids, o_label_node_ids, o_return_node_ids)
                 self._connect(curr_node_id, start_node_id)
                 self._connect(end_node_id, merge_node_id)
             else:
@@ -108,7 +118,7 @@ class CFG:
 
             while_body = get_while_body(curr_node)
 
-            start_node_id, end_node_id = self._construct_control_flow_common(while_body, while_breaks, while_continues, o_goto_node_ids, o_label_node_ids)
+            start_node_id, end_node_id = self._construct_control_flow_common(while_body, while_breaks, while_continues, o_goto_node_ids, o_label_node_ids, o_return_node_ids)
             self._connect(curr_node_id, start_node_id)
             self._connect(end_node_id, merge_node_id)
 
@@ -127,7 +137,7 @@ class CFG:
 
             switch_body = get_switch_body(curr_node)
 
-            start_node_id, end_node_id = self._construct_control_flow_common(switch_body, switch_breaks, o_cont_node_ids, o_goto_node_ids, o_label_node_ids)
+            start_node_id, end_node_id = self._construct_control_flow_common(switch_body, switch_breaks, o_cont_node_ids, o_goto_node_ids, o_label_node_ids, o_return_node_ids)
             self._connect(curr_node_id, start_node_id)
             self._connect(end_node_id, merge_node_id)
 
@@ -141,7 +151,7 @@ class CFG:
             case_body = get_case_body(curr_node)
 
             start_node_id, end_node_id = self._construct_control_flow_common(case_body, o_break_node_ids,
-                                                                             o_cont_node_ids, o_goto_node_ids, o_label_node_ids)
+                                                                             o_cont_node_ids, o_goto_node_ids, o_label_node_ids, o_return_node_ids)
             self._connect(curr_node_id, start_node_id)
             self._connect(end_node_id, merge_node_id)
 
@@ -154,7 +164,7 @@ class CFG:
             default_body = get_default_body(curr_node)
 
             start_node_id, end_node_id = self._construct_control_flow_common(default_body, o_break_node_ids,
-                                                                             o_cont_node_ids, o_goto_node_ids, o_label_node_ids)
+                                                                             o_cont_node_ids, o_goto_node_ids, o_label_node_ids, o_return_node_ids)
             self._connect(curr_node_id, start_node_id)
             self._connect(end_node_id, merge_node_id)
 
@@ -177,17 +187,20 @@ class CFG:
             for c in curr_node.get_children():
                 start_node_id, end_node_id = self._construct_control_flow_common(c, o_break_node_ids,
                                                                              o_cont_node_ids, o_goto_node_ids,
-                                                                             o_label_node_ids)
+                                                                             o_label_node_ids, o_return_node_ids)
                 self._connect(curr_node_id, start_node_id)
                 self._connect(end_node_id, merge_node_id)
             o_label_node_ids.append(curr_node_id)
             return curr_node_id, merge_node_id
         elif curr_node.kind == CursorKind.BINARY_OPERATOR \
                 or curr_node.kind == CursorKind.UNARY_OPERATOR \
-                or curr_node.kind == CursorKind.DECL_STMT \
-                or curr_node.kind == CursorKind.RETURN_STMT:
+                or curr_node.kind == CursorKind.DECL_STMT :
             curr_node_id = self._get_new_node(curr_node)
             return curr_node_id, curr_node_id
+        elif curr_node.kind == CursorKind.RETURN_STMT:
+            curr_node_id = self._get_new_node(curr_node)
+            o_return_node_ids.append(curr_node_id)
+            return curr_node_id, None
         elif curr_node.kind == CursorKind.NULL_STMT:
             curr_node_id = self._get_new_node(DummyNode("empty statement"))
             return curr_node_id, curr_node_id

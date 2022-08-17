@@ -31,6 +31,8 @@ class Violation:
                 message = "goto (%s) is used" % self.supplementary
             elif self.sub_id == 2:
                 message = "jump to nested label from goto: %s" % self.supplementary
+            elif self.sub_id == 5:
+                message = "there are more than 1 exit in : %s" % self.supplementary
             elif self.sub_id == 7:
                 message = "all if shall have else statement: %s" % self.supplementary
 

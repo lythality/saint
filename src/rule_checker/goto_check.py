@@ -24,7 +24,7 @@ def check_goto(checker, functions):
         check_goto_label_only_appear_upper_block(f.function_decl, [])
 
         # 15.7 - all if has else
-        check_existence_of_else(f.function_decl, [])
+        # check_existence_of_else(f.function_decl, [])
 
 
 def find_and_report_goto_usage(n):
