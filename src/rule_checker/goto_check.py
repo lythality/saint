@@ -23,6 +23,9 @@ def check_goto(checker, functions):
         # 15.2 - goto label only appear upper block
         check_goto_label_only_appear_upper_block(f.function_decl, [])
 
+        # 15.6 - iteration/selection body shall be compound
+        check_comp_body(f.function_decl)
+
         # 15.7 - all if has else
         # check_existence_of_else(f.function_decl, [])
 
@@ -54,6 +57,26 @@ def check_goto_label_only_appear_upper_block(n, found_labels):
     # iterate recursively
     for c in n.get_children():
         check_goto_label_only_appear_upper_block(c, found_labels)
+
+
+def check_comp_body(n):
+    # check body type
+    if n.kind == CursorKind.IF_STMT:
+        if get_if_body(n).kind != CursorKind.COMPOUND_STMT:
+            rule_checker.add_violation(Violation(15, 6, getTokenString(n)))
+        else_body = get_else_body(n)
+        if else_body and else_body.kind != CursorKind.COMPOUND_STMT:
+            rule_checker.add_violation(Violation(15, 6, getTokenString(n)))
+    elif n.kind == CursorKind.WHILE_STMT:
+        if get_while_body(n).kind != CursorKind.COMPOUND_STMT:
+            rule_checker.add_violation(Violation(15, 6, getTokenString(n)))
+    elif n.kind == CursorKind.SWITCH_STMT:
+        if get_switch_body(n).kind != CursorKind.COMPOUND_STMT:
+            rule_checker.add_violation(Violation(15, 6, getTokenString(n)))
+
+    # iterate recursively
+    for c in n.get_children():
+        check_comp_body(c)
 
 
 def check_existence_of_else(n, found_labels):
