@@ -22,7 +22,7 @@ def check_cfg(checker, functions):
         num = num_of_point_of_exit(cfg.init_node_id, cfg, [])
         print(cfg.get_control_flow_graph_info())
         print(cfg.func_name + " :: " + str(num))
-        if num != 1:
+        if num > 1:
             rule_checker.add_violation(Violation(15, 5, cfg.func_name + ", " + str(num)))
 
 
