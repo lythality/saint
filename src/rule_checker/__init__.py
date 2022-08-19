@@ -12,6 +12,7 @@ from rule_checker.array_init_check import check_array_init, is_array, get_array_
 from rule_checker.goto_check import check_goto
 from rule_checker.cfg_check import check_cfg
 from rule_checker.switch_check import check_switch
+from rule_checker.func_check import check_func
 from rule_checker.violation import Violation
 
 
@@ -350,3 +351,6 @@ class RuleChecker(SWorkspace):
         for t_unit in self.translation_unit:
             if "#include<stdarg.h" in getTokenString(t_unit):
                 self.add_violation(Violation(17, 1, n.spelling))
+
+        # checking rule 17.* - function check
+        check_func(self, self.function)
