@@ -194,7 +194,7 @@ class CFG:
             return curr_node_id, merge_node_id
         elif curr_node.kind == CursorKind.BINARY_OPERATOR \
                 or curr_node.kind == CursorKind.UNARY_OPERATOR \
-                or curr_node.kind == CursorKind.DECL_STMT :
+                or curr_node.kind == CursorKind.DECL_STMT:
             curr_node_id = self._get_new_node(curr_node)
             return curr_node_id, curr_node_id
         elif curr_node.kind == CursorKind.RETURN_STMT:
@@ -237,6 +237,7 @@ class DummyNode:
 
     def __init__(self, name):
         self.tokens = [DummyToken(txt) for txt in name.split()]
+        self.kind = -1
 
     def get_tokens(self):
         return self.tokens
