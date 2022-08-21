@@ -22,7 +22,37 @@ class Violation:
             elif self.sub_id == 2:
                 message = "trigraph %s shall not be used" % self.supplementary
 
-        if self.rule_id == 9:
+        elif self.rule_id == 8:
+            if self.sub_id == 1:
+                message = "type shall be explicitly specified on: %s" % self.supplementary
+            elif self.sub_id == 2:
+                message = "func shall be prototype form with named params: %s" % self.supplementary
+            elif self.sub_id == 3:
+                message = "decl of an obj or func shall use the same names and type quals: %s" % self.supplementary
+            elif self.sub_id == 4:
+                message = ": %s" % self.supplementary
+            elif self.sub_id == 5:
+                message = ": %s" % self.supplementary
+            elif self.sub_id == 6:
+                message = ": %s" % self.supplementary
+            elif self.sub_id == 7:
+                message = ": %s" % self.supplementary
+            elif self.sub_id == 8:
+                message = ": %s" % self.supplementary
+            elif self.sub_id == 9:
+                message = ": %s" % self.supplementary
+            elif self.sub_id == 10:
+                message = "an inline function shall be declared as static inline: %s" % self.supplementary
+            elif self.sub_id == 11:
+                message = "extern array should have all size: %s" % self.supplementary
+            elif self.sub_id == 12:
+                message = "enum contains duplicated constant for : %s" % self.supplementary
+            elif self.sub_id == 13:
+                message = ": %s" % self.supplementary
+            elif self.sub_id == 14:
+                message = ": %s" % self.supplementary
+
+        elif self.rule_id == 9:
             if self.sub_id == 1:
                 message = "automatic storage shall be defined before use: %s" % self.supplementary
             elif self.sub_id == 2:

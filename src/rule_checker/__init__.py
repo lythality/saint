@@ -316,7 +316,7 @@ class RuleChecker(SWorkspace):
         for n in self.function_decl:
             signature = getTokenString(n)
             if signature.startswith("inline") or signature.startswith("externinline"):
-                print(" > an inline function shall be declared as static inline")
+                self.add_violation(Violation(8, 10, signature))
 
         # checking rule 8.11 - extern array should have size
         for n in self.var_decl:
@@ -324,7 +324,7 @@ class RuleChecker(SWorkspace):
             if signature.startswith("extern") and is_array(n):
                 dimension = n.type.spelling.count("[")
                 if dimension != len(get_array_size_list(n)):
-                    print(" > extern array should have all size: "+n.spelling)
+                    self.add_violation(Violation(8, 11, n.spelling))
 
         # checking rule 8.12 - enum check
         for n in self.enum_decl:
@@ -350,7 +350,7 @@ class RuleChecker(SWorkspace):
             for key_ex, value_ex in enum_dict_explicit.items():
                 for key_im, value_im in enum_dict_implicit.items():
                     if value_ex == value_im:
-                        print(" > enum contains duplicated constant for "+key_ex+" = "+key_im+" = "+str(value_im))
+                        self.add_violation(Violation(8, 12, key_ex+" = "+key_im+" = "+str(value_im)))
 
         # checking rule 9.[2,3,4,5] - array init check
         internal_array_vars = list(filter(lambda v: is_array(v) and not getTokenString(v).startswith("extern"),
