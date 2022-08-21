@@ -25,5 +25,14 @@ int main() {
     // string check
     const_str = "AA";
     just_str = "AA";
+
+    // escape seq
+    const char *hexa1 = "\x41g";
+    const char *hexa2 = "\x41" "g";
+    const char *hexa3 = "\x41\x67";
+
+    int octal1 = '\141t';
+    int octal2 = '\141\t';
+
     return c;
 }

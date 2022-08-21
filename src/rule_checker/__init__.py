@@ -245,6 +245,25 @@ class RuleChecker(SWorkspace):
             if "/*" in comment_text or "//" in comment_text:
                 print(" > /* or // shall not be used within comment: " + comment_text)
 
+        # checking rule 4.1 - octal/hexa escape seq. checking
+        for s in self.string_literal:
+            for each_string in filter(lambda t: t, getTokenString(s).split("\"")):
+                # print(each_string, each_string.split("\\"))
+                for each_escape in filter(lambda t: t, each_string.split("\\")):
+                    if each_escape.startswith("x") and not re.fullmatch(r"x\d+", each_escape):
+                        print(" > octal/hexa escape sequence shall be separated in " + getTokenString(s))
+                    elif re.match(r"^\d", each_escape) and not re.fullmatch(r"\d+", each_escape):
+                        print(" > octal/hexa escape sequence shall be separated in " + getTokenString(s))
+
+        for s in self.character_literal:
+            for each_string in filter(lambda t: t, getTokenString(s).split("\'")):
+                # print(each_string, each_string.split("\\"))
+                for each_escape in filter(lambda t: t, each_string.split("\\")):
+                    if each_escape.startswith("x") and not re.fullmatch(r"x\d+", each_escape):
+                        print(" > octal/hexa escape sequence shall be separated in " + getTokenString(s))
+                    elif re.match(r"^\d", each_escape) and not re.fullmatch(r"\d+", each_escape):
+                        print(" > octal/hexa escape sequence shall be separated in " + getTokenString(s))
+
         # checking rule 4.2 - no_trigraph
         global trigraph_strings
         for tri in trigraph_strings:
