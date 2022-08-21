@@ -16,6 +16,12 @@ class Violation:
 
     def get_message(self):
         message = "Not defined"
+        if self.rule_id == 4:
+            if self.sub_id == 1:
+                message = "octal/hexa escape sequence shall be separated in: %s" % self.supplementary
+            elif self.sub_id == 2:
+                message = "trigraph %s shall not be used" % self.supplementary
+
         if self.rule_id == 9:
             if self.sub_id == 1:
                 message = "automatic storage shall be defined before use: %s" % self.supplementary
