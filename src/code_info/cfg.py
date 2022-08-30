@@ -194,6 +194,7 @@ class CFG:
             return curr_node_id, merge_node_id
         elif curr_node.kind == CursorKind.BINARY_OPERATOR \
                 or curr_node.kind == CursorKind.UNARY_OPERATOR \
+                or curr_node.kind == CursorKind.CONDITIONAL_OPERATOR \
                 or curr_node.kind == CursorKind.DECL_STMT:
             curr_node_id = self._get_new_node(curr_node)
             return curr_node_id, curr_node_id
@@ -241,3 +242,6 @@ class DummyNode:
 
     def get_tokens(self):
         return self.tokens
+
+    def get_children(self):
+        return []
