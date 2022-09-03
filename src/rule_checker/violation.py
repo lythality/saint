@@ -64,6 +64,10 @@ class Violation:
             elif self.sub_id == 5:
                 message = "array size is not given on index based initialized array %s" % self.supplementary
 
+        elif self.rule_id == 10:
+            if self.sub_id == 1:
+                message = "operans shall not be inappropriate essential type: %s" % self.supplementary
+
         elif self.rule_id == 15:
             if self.sub_id == 1:
                 message = "goto (%s) is used" % self.supplementary

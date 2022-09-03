@@ -10,6 +10,7 @@ import re
 
 from rule_checker.array_init_check import check_array_init, is_array, get_array_size_list
 from rule_checker.goto_check import check_goto
+from rule_checker.type_check import check_type
 from rule_checker.cfg_check import check_cfg
 from rule_checker.switch_check import check_switch
 from rule_checker.func_check import check_func
@@ -356,6 +357,9 @@ class RuleChecker(SWorkspace):
         internal_array_vars = list(filter(lambda v: is_array(v) and not getTokenString(v).startswith("extern"),
                                           self.var_decl))
         check_array_init(self, internal_array_vars)
+
+        # checking rule 10.* - type check
+        check_type(self, self.function)
 
         # checking rule 15.* - goto check
         check_goto(self, self.function)

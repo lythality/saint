@@ -349,3 +349,10 @@ def get_condop_false_expr(n):
 
     # shall not reachable
     return None
+
+
+def get_type_name(n):
+    if n.kind == CursorKind.UNEXPOSED_EXPR:
+        if n.get_children():
+            return get_type_name(n.get_children().__next__())
+    return n.type.spelling

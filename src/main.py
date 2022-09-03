@@ -24,6 +24,7 @@ if __name__ == '__main__':
         # start_saint('../test_res/test_cfg.c')
         # start_saint('../test_res/test_comments.c')
         # start_saint('../test_res/test_control.c')
+        start_saint('../test_res/test_expr.c')
         # start_saint('../test_res/test_goto_15_1.c')
         # start_saint('../test_res/test_goto_15_3.c')
         # start_saint('../test_res/test_func_decl.c')
@@ -33,4 +34,4 @@ if __name__ == '__main__':
         # start_saint('../test_res/test_typedef.c')
         # start_saint('../test_res/test_string.c')
         # start_saint('../test_res/test_bitfield.c')
-        start_saint('../test_res/test_value.c')
+        # start_saint('../test_res/test_value.c')
