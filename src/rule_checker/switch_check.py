@@ -2,6 +2,7 @@ import re
 
 from clang.cindex import CursorKind
 
+from code_info.cursor_util import get_default_body
 from code_info.util import getTokenString
 
 from rule_checker.violation import Violation
@@ -18,6 +19,10 @@ def check_switch(checker, functions):
         # 16.2 - case shall used immediately below switch
         for c in f.function_decl.get_children():
             check_case_used_below_switch(c, [])
+
+        # 16.4 - all switch shall have default
+        for c in f.function_decl.get_children():
+            check_default_for_switch(c)
 
 
 def check_case_used_below_switch(n, parent_stack):
@@ -50,3 +55,14 @@ def check_case_used_below_switch(n, parent_stack):
     for c in n.get_children():
         check_case_used_below_switch(c, parent_stack)
     parent_stack.pop()
+
+
+def check_default_for_switch(n):
+    # report violation
+    if n.kind == CursorKind.SWITCH_STMT:
+        if get_default_body(n) is None:
+            rule_checker.add_violation(Violation(16, 4, getTokenString(n)))
+
+    # iterate recursively
+    for c in n.get_children():
+        check_default_for_switch(c)

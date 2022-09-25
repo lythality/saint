@@ -10,7 +10,10 @@ import re
 
 from rule_checker.array_init_check import check_array_init, is_array, get_array_size_list
 from rule_checker.goto_check import check_goto
+from rule_checker.type_check import check_type
+from rule_checker.cfg_check import check_cfg
 from rule_checker.switch_check import check_switch
+from rule_checker.func_check import check_func
 from rule_checker.violation import Violation
 
 
@@ -243,12 +246,31 @@ class RuleChecker(SWorkspace):
             if "/*" in comment_text or "//" in comment_text:
                 print(" > /* or // shall not be used within comment: " + comment_text)
 
+        # checking rule 4.1 - octal/hexa escape seq. checking
+        for s in self.string_literal:
+            for each_string in filter(lambda t: t, getTokenString(s).split("\"")):
+                # print(each_string, each_string.split("\\"))
+                for each_escape in filter(lambda t: t, each_string.split("\\")):
+                    if each_escape.startswith("x") and not re.fullmatch(r"x\d+", each_escape):
+                        self.add_violation(Violation(4, 1, getTokenString(s)))
+                    elif re.match(r"^\d", each_escape) and not re.fullmatch(r"\d+", each_escape):
+                        self.add_violation(Violation(4, 1, getTokenString(s)))
+
+        for s in self.character_literal:
+            for each_string in filter(lambda t: t, getTokenString(s).split("\'")):
+                # print(each_string, each_string.split("\\"))
+                for each_escape in filter(lambda t: t, each_string.split("\\")):
+                    if each_escape.startswith("x") and not re.fullmatch(r"x\d+", each_escape):
+                        self.add_violation(Violation(4, 1, getTokenString(s)))
+                    elif re.match(r"^\d", each_escape) and not re.fullmatch(r"\d+", each_escape):
+                        self.add_violation(Violation(4, 1, getTokenString(s)))
+
         # checking rule 4.2 - no_trigraph
         global trigraph_strings
         for tri in trigraph_strings:
             for s in self.string_literal:
                 if tri in getTokenString(s):
-                    print(" > trigraph " + tri + " shall not be used")
+                    self.add_violation(Violation(4, 2, tri + "in" + getTokenString(s)))
 
         # checking rule 6.1 - bit_field_type are restricted
         for n in self.field_decl:
@@ -295,7 +317,7 @@ class RuleChecker(SWorkspace):
         for n in self.function_decl:
             signature = getTokenString(n)
             if signature.startswith("inline") or signature.startswith("externinline"):
-                print(" > an inline function shall be declared as static inline")
+                self.add_violation(Violation(8, 10, signature))
 
         # checking rule 8.11 - extern array should have size
         for n in self.var_decl:
@@ -303,7 +325,7 @@ class RuleChecker(SWorkspace):
             if signature.startswith("extern") and is_array(n):
                 dimension = n.type.spelling.count("[")
                 if dimension != len(get_array_size_list(n)):
-                    print(" > extern array should have all size: "+n.spelling)
+                    self.add_violation(Violation(8, 11, n.spelling))
 
         # checking rule 8.12 - enum check
         for n in self.enum_decl:
@@ -329,15 +351,21 @@ class RuleChecker(SWorkspace):
             for key_ex, value_ex in enum_dict_explicit.items():
                 for key_im, value_im in enum_dict_implicit.items():
                     if value_ex == value_im:
-                        print(" > enum contains duplicated constant for "+key_ex+" = "+key_im+" = "+str(value_im))
+                        self.add_violation(Violation(8, 12, key_ex+" = "+key_im+" = "+str(value_im)))
 
         # checking rule 9.[2,3,4,5] - array init check
         internal_array_vars = list(filter(lambda v: is_array(v) and not getTokenString(v).startswith("extern"),
                                           self.var_decl))
         check_array_init(self, internal_array_vars)
 
+        # checking rule 10.* - type check
+        check_type(self, self.function)
+
         # checking rule 15.* - goto check
         check_goto(self, self.function)
+
+        # checking rules for cfg
+        check_cfg(self, self.function)
 
         # checking rule 16.* - switch check
         check_switch(self, self.function)
@@ -346,3 +374,6 @@ class RuleChecker(SWorkspace):
         for t_unit in self.translation_unit:
             if "#include<stdarg.h" in getTokenString(t_unit):
                 self.add_violation(Violation(17, 1, n.spelling))
+
+        # checking rule 17.* - function check
+        check_func(self, self.function)
