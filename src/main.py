@@ -1,6 +1,8 @@
 from sys import argv
 from rule_checker import RuleChecker
 
+with_gui = True
+
 def start_saint(srcfile: str):
     trav = RuleChecker()
     trav.add_file(srcfile)
@@ -18,6 +20,16 @@ if __name__ == '__main__':
         for arg in argv[1:]:
             print(arg)
             start_saint(arg)
+    elif with_gui:
+        import sys
+        from PyQt5 import QtGui, QtWidgets
+        from ui.main_view import Ui_MainWindow
+        app = QtWidgets.QApplication(sys.argv)
+        MainWindow = QtWidgets.QMainWindow()
+        ui = Ui_MainWindow()
+        ui.setupUi(MainWindow)
+        MainWindow.show()
+        app.exec_()
     else:
         # start_saint('../test_res/test_array.c')
         # start_saint('../test_res/test_bitfield.c')
