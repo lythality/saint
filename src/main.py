@@ -13,6 +13,17 @@ def start_saint(srcfile: str):
     #     print(f.get_control_flow_graph_info())
 
 
+from PyQt5.QtWidgets import QApplication, QMainWindow
+
+
+class My_MainWindow(QMainWindow):
+    def __init__(self):
+        super().__init__()
+
+    def button_clicked(self):
+        print("pressed")
+
+
 # the main function
 if __name__ == '__main__':
     # process files in argv
@@ -25,7 +36,7 @@ if __name__ == '__main__':
         from PyQt5 import QtGui, QtWidgets
         from ui.main_view import Ui_MainWindow
         app = QtWidgets.QApplication(sys.argv)
-        MainWindow = QtWidgets.QMainWindow()
+        MainWindow = My_MainWindow()
         ui = Ui_MainWindow()
         ui.setupUi(MainWindow)
         MainWindow.show()

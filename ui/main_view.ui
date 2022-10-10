@@ -25,6 +25,9 @@
         <property name="text">
          <string>PushButton</string>
         </property>
+        <property name="checkable">
+         <bool>false</bool>
+        </property>
        </widget>
       </item>
       <item row="0" column="2">
@@ -53,7 +56,11 @@
      <widget class="QTableWidget" name="tableWidget"/>
     </item>
     <item>
-     <widget class="QTextEdit" name="textEdit"/>
+     <widget class="QTextEdit" name="textEdit">
+      <property name="placeholderText">
+       <string>abc</string>
+      </property>
+     </widget>
     </item>
    </layout>
   </widget>
@@ -70,5 +77,25 @@
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>pushButton</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>button_clicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>74</x>
+     <y>45</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>374</x>
+     <y>46</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>button_clicked()</slot>
+ </slots>
 </ui>
