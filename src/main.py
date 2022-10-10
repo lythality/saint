@@ -19,9 +19,12 @@ from PyQt5.QtWidgets import QApplication, QMainWindow
 class My_MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
+        self.ui = Ui_MainWindow()
+        self.ui.setupUi(self)
 
     def button_clicked(self):
         print("pressed")
+        self.ui.textEdit.setText("ABC")
 
 
 # the main function
@@ -37,8 +40,6 @@ if __name__ == '__main__':
         from ui.main_view import Ui_MainWindow
         app = QtWidgets.QApplication(sys.argv)
         MainWindow = My_MainWindow()
-        ui = Ui_MainWindow()
-        ui.setupUi(MainWindow)
         MainWindow.show()
         app.exec_()
     else:

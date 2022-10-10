@@ -132,6 +132,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>pushButton_2</sender>
+   <signal>clicked()</signal>
+   <receiver>textEdit</receiver>
+   <slot>hide()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>182</x>
+     <y>42</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>212</x>
+     <y>444</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>button_clicked()</slot>
