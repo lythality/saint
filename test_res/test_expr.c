@@ -17,7 +17,7 @@ int main() {
     str004[boolVar] = 'a';
     str004[charVar] = 'a';
     str004[signedVar] = 'a';
-    str004[unsignedVar] = 'a';
+    str004[unsignedVar] = 'a';W
     str004[floatingVar] = 'a';
 
     // unary access

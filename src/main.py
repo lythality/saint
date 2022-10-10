@@ -13,7 +13,7 @@ def start_saint(srcfile: str):
     #     print(f.get_control_flow_graph_info())
 
 
-from PyQt5.QtWidgets import QApplication, QMainWindow
+from PyQt5.QtWidgets import QApplication, QMainWindow, QTableWidgetItem
 
 
 class My_MainWindow(QMainWindow):
@@ -25,6 +25,9 @@ class My_MainWindow(QMainWindow):
     def button_clicked(self):
         print("pressed")
         self.ui.textEdit.setText("ABC")
+
+    def show_code(self):
+        self.ui.textEdit.setText(open('../test_res/test_expr.c', 'r').read())
 
 
 # the main function
@@ -41,6 +44,14 @@ if __name__ == '__main__':
         app = QtWidgets.QApplication(sys.argv)
         MainWindow = My_MainWindow()
         MainWindow.show()
+        # test - start
+        MainWindow.ui.textEdit.setText(open('../test_res/test_expr.c', 'r').read())
+        lines = open('../test_res/test_expr.c', 'r').read().split("\n")
+        for i in range(len(lines)):
+            MainWindow.ui.codeWidget.insertRow(MainWindow.ui.codeWidget.rowCount())
+            MainWindow.ui.codeWidget.setItem(i, 0, QTableWidgetItem(str(i+1)))
+            MainWindow.ui.codeWidget.setItem(i, 2, QTableWidgetItem(lines[i]))
+        # test - end
         app.exec_()
     else:
         # start_saint('../test_res/test_array.c')
