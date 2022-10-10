@@ -14,6 +14,7 @@ def start_saint(srcfile: str):
 
 
 from PyQt5.QtWidgets import QApplication, QMainWindow, QTableWidgetItem
+from PyQt5 import QtCore
 
 
 class My_MainWindow(QMainWindow):
@@ -49,8 +50,22 @@ if __name__ == '__main__':
         lines = open('../test_res/test_expr.c', 'r').read().split("\n")
         for i in range(len(lines)):
             MainWindow.ui.codeWidget.insertRow(MainWindow.ui.codeWidget.rowCount())
-            MainWindow.ui.codeWidget.setItem(i, 0, QTableWidgetItem(str(i+1)))
-            MainWindow.ui.codeWidget.setItem(i, 2, QTableWidgetItem(lines[i]))
+            # adding line number
+            line_number = QTableWidgetItem(str(i+1))
+            line_number.setTextAlignment(QtCore.Qt.AlignTrailing|QtCore.Qt.AlignTop)
+            MainWindow.ui.codeWidget.setItem(i, 0, line_number)
+            # adding color
+            line_color = QTableWidgetItem()
+            line_color.setBackground(QtGui.QColor(100,100,150))
+            MainWindow.ui.codeWidget.setItem(i, 1, line_color)
+            # adding line content
+            line_content = QTableWidgetItem(lines[i])
+            line_content.setTextAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignTop)
+            MainWindow.ui.codeWidget.setItem(i, 2, line_content)
+        MainWindow.ui.codeWidget.resizeColumnsToContents()
+        # MainWindow.ui.codeWidget.setStyleSheet("""
+        #     QTableWidget::item {padding-left: 0px; border: 0px}
+        #     """)
         # test - end
         app.exec_()
     else:
