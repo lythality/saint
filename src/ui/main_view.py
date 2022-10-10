@@ -34,6 +34,8 @@ class Ui_MainWindow(object):
         self.verticalLayout.addLayout(self.gridLayout)
         self.tableWidget = QtWidgets.QTableWidget(self.centralwidget)
         self.tableWidget.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+        self.tableWidget.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
+        self.tableWidget.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
         self.tableWidget.setRowCount(2)
         self.tableWidget.setColumnCount(4)
         self.tableWidget.setObjectName("tableWidget")
@@ -69,9 +71,6 @@ class Ui_MainWindow(object):
         self.codeWidget.verticalHeader().setHighlightSections(False)
         self.codeWidget.verticalHeader().setMinimumSectionSize(0)
         self.verticalLayout.addWidget(self.codeWidget)
-        self.textEdit = QtWidgets.QTextEdit(self.centralwidget)
-        self.textEdit.setObjectName("textEdit")
-        self.verticalLayout.addWidget(self.textEdit)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 801, 21))
@@ -83,7 +82,6 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
         self.pushButton.clicked.connect(MainWindow.button_clicked) # type: ignore
-        self.pushButton_2.clicked.connect(self.textEdit.hide) # type: ignore
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
@@ -99,4 +97,3 @@ class Ui_MainWindow(object):
         item.setText(_translate("MainWindow", "Loc."))
         item = self.tableWidget.horizontalHeaderItem(3)
         item.setText(_translate("MainWindow", "Comment"))
-        self.textEdit.setPlaceholderText(_translate("MainWindow", "abc"))

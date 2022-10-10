@@ -57,6 +57,12 @@
       <property name="editTriggers">
        <set>QAbstractItemView::NoEditTriggers</set>
       </property>
+      <property name="selectionMode">
+       <enum>QAbstractItemView::SingleSelection</enum>
+      </property>
+      <property name="selectionBehavior">
+       <enum>QAbstractItemView::SelectRows</enum>
+      </property>
       <property name="rowCount">
        <number>2</number>
       </property>
@@ -147,13 +153,6 @@
       <column/>
      </widget>
     </item>
-    <item>
-     <widget class="QTextEdit" name="textEdit">
-      <property name="placeholderText">
-       <string>abc</string>
-      </property>
-     </widget>
-    </item>
    </layout>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -183,22 +182,6 @@
     <hint type="destinationlabel">
      <x>374</x>
      <y>46</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>pushButton_2</sender>
-   <signal>clicked()</signal>
-   <receiver>textEdit</receiver>
-   <slot>hide()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>182</x>
-     <y>42</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>212</x>
-     <y>444</y>
     </hint>
    </hints>
   </connection>

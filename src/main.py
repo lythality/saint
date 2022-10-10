@@ -16,6 +16,16 @@ def start_saint(srcfile: str):
 from PyQt5.QtWidgets import QApplication, QMainWindow, QTableWidgetItem
 from PyQt5 import QtCore
 
+import sys
+from PyQt5 import QtGui, QtWidgets
+from ui.main_view import Ui_MainWindow
+
+def open_gui():
+    app = QtWidgets.QApplication(sys.argv)
+    MainWindow = My_MainWindow()
+    MainWindow.show()
+    app.exec_()
+
 
 class My_MainWindow(QMainWindow):
     def __init__(self):
@@ -25,10 +35,30 @@ class My_MainWindow(QMainWindow):
 
     def button_clicked(self):
         print("pressed")
-        self.ui.textEdit.setText("ABC")
+        self.show_code()
 
     def show_code(self):
-        self.ui.textEdit.setText(open('../test_res/test_expr.c', 'r').read())
+        # test - start
+        lines = open('../test_res/test_expr.c', 'r').read().split("\n")
+        for i in range(len(lines)):
+            self.ui.codeWidget.insertRow(self.ui.codeWidget.rowCount())
+            # adding line number
+            line_number = QTableWidgetItem(str(i + 1))
+            line_number.setTextAlignment(QtCore.Qt.AlignTrailing | QtCore.Qt.AlignTop)
+            self.ui.codeWidget.setItem(i, 0, line_number)
+            # adding color
+            line_color = QTableWidgetItem()
+            line_color.setBackground(QtGui.QColor(100, 100, 150))
+            self.ui.codeWidget.setItem(i, 1, line_color)
+            # adding line content
+            line_content = QTableWidgetItem(lines[i])
+            line_content.setTextAlignment(QtCore.Qt.AlignLeading | QtCore.Qt.AlignTop)
+            self.ui.codeWidget.setItem(i, 2, line_content)
+        self.ui.codeWidget.resizeColumnsToContents()
+        # self.ui.codeWidget.setStyleSheet("""
+        #     QTableWidget::item {padding-left: 0px; border: 0px}
+        #     """)
+        # test - end
 
 
 # the main function
@@ -39,35 +69,7 @@ if __name__ == '__main__':
             print(arg)
             start_saint(arg)
     elif with_gui:
-        import sys
-        from PyQt5 import QtGui, QtWidgets
-        from ui.main_view import Ui_MainWindow
-        app = QtWidgets.QApplication(sys.argv)
-        MainWindow = My_MainWindow()
-        MainWindow.show()
-        # test - start
-        MainWindow.ui.textEdit.setText(open('../test_res/test_expr.c', 'r').read())
-        lines = open('../test_res/test_expr.c', 'r').read().split("\n")
-        for i in range(len(lines)):
-            MainWindow.ui.codeWidget.insertRow(MainWindow.ui.codeWidget.rowCount())
-            # adding line number
-            line_number = QTableWidgetItem(str(i+1))
-            line_number.setTextAlignment(QtCore.Qt.AlignTrailing|QtCore.Qt.AlignTop)
-            MainWindow.ui.codeWidget.setItem(i, 0, line_number)
-            # adding color
-            line_color = QTableWidgetItem()
-            line_color.setBackground(QtGui.QColor(100,100,150))
-            MainWindow.ui.codeWidget.setItem(i, 1, line_color)
-            # adding line content
-            line_content = QTableWidgetItem(lines[i])
-            line_content.setTextAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignTop)
-            MainWindow.ui.codeWidget.setItem(i, 2, line_content)
-        MainWindow.ui.codeWidget.resizeColumnsToContents()
-        # MainWindow.ui.codeWidget.setStyleSheet("""
-        #     QTableWidget::item {padding-left: 0px; border: 0px}
-        #     """)
-        # test - end
-        app.exec_()
+        open_gui()
     else:
         # start_saint('../test_res/test_array.c')
         # start_saint('../test_res/test_bitfield.c')
