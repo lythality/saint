@@ -1,7 +1,7 @@
 from sys import argv
 from rule_checker import RuleChecker
 
-with_gui = True
+with_gui = False
 
 def start_saint(srcfile: str):
     trav = RuleChecker()
@@ -11,6 +11,7 @@ def start_saint(srcfile: str):
     trav.print_violations()
     # for f in trav.function:
     #     print(f.get_control_flow_graph_info())
+    return trav.violations
 
 
 from PyQt5.QtWidgets import QApplication, QMainWindow, QTableWidgetItem
@@ -20,9 +21,16 @@ import sys
 from PyQt5 import QtGui, QtWidgets
 from ui.main_view import Ui_MainWindow
 
-def open_gui():
+
+def open_gui(violations=[]):
+    # basic gui open - start
     app = QtWidgets.QApplication(sys.argv)
     MainWindow = My_MainWindow()
+
+    # set violations
+    MainWindow.show_violations(violations)
+
+    # basic gui open - end
     MainWindow.show()
     app.exec_()
 
@@ -60,6 +68,20 @@ class My_MainWindow(QMainWindow):
         #     """)
         # test - end
 
+    def show_violations(self, violations):
+        print("AA")
+        for i in range(len(violations)):
+            self.ui.vioWidget.insertRow(self.ui.vioWidget.rowCount())
+            # adding rule_id
+            rule_id = QTableWidgetItem(str(violations[i].rule_id) + ", " + str(violations[i].sub_id))
+            rule_id.setTextAlignment(QtCore.Qt.AlignLeading | QtCore.Qt.AlignTop)
+            self.ui.vioWidget.setItem(i, 0, rule_id)
+            # adding comment
+            comment = QTableWidgetItem(violations[i].get_message())
+            comment.setTextAlignment(QtCore.Qt.AlignLeading | QtCore.Qt.AlignTop)
+            self.ui.vioWidget.setItem(i, 3, comment)
+        self.ui.vioWidget.resizeColumnsToContents()
+
 
 # the main function
 if __name__ == '__main__':
@@ -71,19 +93,20 @@ if __name__ == '__main__':
     elif with_gui:
         open_gui()
     else:
-        # start_saint('../test_res/test_array.c')
-        # start_saint('../test_res/test_bitfield.c')
-        # start_saint('../test_res/test_cfg.c')
-        # start_saint('../test_res/test_comments.c')
-        # start_saint('../test_res/test_control.c')
-        start_saint('../test_res/test_expr.c')
-        # start_saint('../test_res/test_goto_15_1.c')
-        # start_saint('../test_res/test_goto_15_3.c')
-        # start_saint('../test_res/test_func_decl.c')
-        # start_saint('../test_res/test_multi001.c')
-        # start_saint('../test_res/test_multi002.c')
-        # start_saint('../test_res/test_switch.c')
-        # start_saint('../test_res/test_typedef.c')
-        # start_saint('../test_res/test_string.c')
-        # start_saint('../test_res/test_bitfield.c')
-        # start_saint('../test_res/test_value.c')
+        # violations = start_saint('../test_res/test_array.c')
+        # violations = start_saint('../test_res/test_bitfield.c')
+        # violations = start_saint('../test_res/test_cfg.c')
+        # violations = start_saint('../test_res/test_comments.c')
+        # violations = start_saint('../test_res/test_control.c')
+        violations = start_saint('../test_res/test_expr.c')
+        # violations = start_saint('../test_res/test_goto_15_1.c')
+        # violations = start_saint('../test_res/test_goto_15_3.c')
+        # violations = start_saint('../test_res/test_func_decl.c')
+        # violations = start_saint('../test_res/test_multi001.c')
+        # violations = start_saint('../test_res/test_multi002.c')
+        # violations = start_saint('../test_res/test_switch.c')
+        # violations = start_saint('../test_res/test_typedef.c')
+        # violations = start_saint('../test_res/test_string.c')
+        # violations = start_saint('../test_res/test_bitfield.c')
+        # violations = start_saint('../test_res/test_value.c')
+        open_gui(violations)
