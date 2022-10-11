@@ -82,6 +82,7 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
         self.pushButton.clicked.connect(MainWindow.button_clicked) # type: ignore
+        self.vioWidget.cellDoubleClicked['int','int'].connect(MainWindow.show_code) # type: ignore
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):

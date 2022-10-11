@@ -45,9 +45,10 @@ class My_MainWindow(QMainWindow):
         print("pressed")
         self.show_code()
 
-    def show_code(self):
+    def show_code(self, row, col):
+        file_name = self.ui.vioWidget.item(row, 1).text()
         # test - start
-        lines = open('../test_res/test_expr.c', 'r').read().split("\n")
+        lines = open(file_name, 'r').read().split("\n")
         for i in range(len(lines)):
             self.ui.codeWidget.insertRow(self.ui.codeWidget.rowCount())
             # adding line number

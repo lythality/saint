@@ -183,8 +183,25 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>vioWidget</sender>
+   <signal>cellDoubleClicked(int,int)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>show_code()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>552</x>
+     <y>266</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>540</x>
+     <y>34</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>button_clicked()</slot>
+  <slot>show_code()</slot>
  </slots>
 </ui>
