@@ -69,6 +69,11 @@ class My_MainWindow(QMainWindow):
         #     """)
         # test - end
 
+        # line number
+        line_number = int(self.ui.vioWidget.item(row, 2).text().split(":")[0])
+        self.ui.codeWidget.selectRow(line_number-1)
+
+
     def show_violations(self, violations):
         print("AA")
         for i in range(len(violations)):
