@@ -49,6 +49,8 @@ class My_MainWindow(QMainWindow):
         file_name = self.ui.vioWidget.item(row, 1).text()
         # test - start
         lines = open(file_name, 'r').read().split("\n")
+        while self.ui.codeWidget.rowCount() > 0:
+            self.ui.codeWidget.removeRow(0)
         for i in range(len(lines)):
             self.ui.codeWidget.insertRow(self.ui.codeWidget.rowCount())
             # adding line number
@@ -71,7 +73,8 @@ class My_MainWindow(QMainWindow):
 
         # line number
         line_number = int(self.ui.vioWidget.item(row, 2).text().split(":")[0])
-        self.ui.codeWidget.selectRow(line_number-1)
+        self.ui.codeWidget.selectRow(line_number - 1)
+        self.ui.codeWidget.scrollTo(self.ui.codeWidget.model().index(line_number - 1, 1))
 
 
     def show_violations(self, violations):
