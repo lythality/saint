@@ -1,9 +1,10 @@
 class Violation:
 
-    def __init__(self, rule_id, sub_id, supplementary):
+    def __init__(self, rule_id, sub_id, supplementary, location=None):
         self.rule_id = rule_id
         self.sub_id = sub_id
         self.supplementary = supplementary
+        self.location = location
 
     def __eq__(self, other):
         if not hasattr(other, "rule_id") \

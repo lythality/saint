@@ -252,25 +252,25 @@ class RuleChecker(SWorkspace):
                 # print(each_string, each_string.split("\\"))
                 for each_escape in filter(lambda t: t, each_string.split("\\")):
                     if each_escape.startswith("x") and not re.fullmatch(r"x\d+", each_escape):
-                        self.add_violation(Violation(4, 1, getTokenString(s)))
+                        self.add_violation(Violation(4, 1, getTokenString(s), s.location))
                     elif re.match(r"^\d", each_escape) and not re.fullmatch(r"\d+", each_escape):
-                        self.add_violation(Violation(4, 1, getTokenString(s)))
+                        self.add_violation(Violation(4, 1, getTokenString(s), s.location))
 
         for s in self.character_literal:
             for each_string in filter(lambda t: t, getTokenString(s).split("\'")):
                 # print(each_string, each_string.split("\\"))
                 for each_escape in filter(lambda t: t, each_string.split("\\")):
                     if each_escape.startswith("x") and not re.fullmatch(r"x\d+", each_escape):
-                        self.add_violation(Violation(4, 1, getTokenString(s)))
+                        self.add_violation(Violation(4, 1, getTokenString(s), s.location))
                     elif re.match(r"^\d", each_escape) and not re.fullmatch(r"\d+", each_escape):
-                        self.add_violation(Violation(4, 1, getTokenString(s)))
+                        self.add_violation(Violation(4, 1, getTokenString(s), s.location))
 
         # checking rule 4.2 - no_trigraph
         global trigraph_strings
         for tri in trigraph_strings:
             for s in self.string_literal:
                 if tri in getTokenString(s):
-                    self.add_violation(Violation(4, 2, tri + "in" + getTokenString(s)))
+                    self.add_violation(Violation(4, 2, tri + "in" + getTokenString(s), s.location))
 
         # checking rule 6.1 - bit_field_type are restricted
         for n in self.field_decl:

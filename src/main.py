@@ -76,6 +76,15 @@ class My_MainWindow(QMainWindow):
             rule_id = QTableWidgetItem(str(violations[i].rule_id) + ", " + str(violations[i].sub_id))
             rule_id.setTextAlignment(QtCore.Qt.AlignLeading | QtCore.Qt.AlignTop)
             self.ui.vioWidget.setItem(i, 0, rule_id)
+            if violations[i].location is not None:
+                # adding file
+                file_name = QTableWidgetItem(str(violations[i].location.file))
+                file_name.setTextAlignment(QtCore.Qt.AlignLeading | QtCore.Qt.AlignTop)
+                self.ui.vioWidget.setItem(i, 1, file_name)
+                # adding location
+                code_loc = QTableWidgetItem(str(violations[i].location.line) + ":" + str(violations[i].location.column))
+                code_loc.setTextAlignment(QtCore.Qt.AlignLeading | QtCore.Qt.AlignTop)
+                self.ui.vioWidget.setItem(i, 2, code_loc)
             # adding comment
             comment = QTableWidgetItem(violations[i].get_message())
             comment.setTextAlignment(QtCore.Qt.AlignLeading | QtCore.Qt.AlignTop)
