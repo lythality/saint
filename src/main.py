@@ -43,7 +43,7 @@ class My_MainWindow(QMainWindow):
 
     def button_clicked(self):
         print("pressed")
-        self.show_code()
+        # self.show_code()
 
     def show_code(self, row, col):
         file_name = self.ui.vioWidget.item(row, 1).text()
