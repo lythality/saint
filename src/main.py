@@ -47,34 +47,41 @@ class My_MainWindow(QMainWindow):
 
     def show_code(self, row, col):
         file_name = self.ui.vioWidget.item(row, 1).text()
+        line_number = int(self.ui.vioWidget.item(row, 2).text().split(":")[0])
+
         # test - start
-        lines = open(file_name, 'r').read().split("\n")
-        while self.ui.codeWidget.rowCount() > 0:
-            self.ui.codeWidget.removeRow(0)
+        code_str = open(file_name, 'r').read()
+        self.show_code_at(self.ui.codeWidget, code_str, line_number)
+        self.show_code_at(self.ui.codeWidgetAfter, code_str, line_number)
+
+    def show_code_at(self, code_widget, code_str, show_line):
+        # test - start
+        lines = code_str.split("\n")
+        while code_widget.rowCount() > 0:
+            code_widget.removeRow(0)
         for i in range(len(lines)):
-            self.ui.codeWidget.insertRow(self.ui.codeWidget.rowCount())
+            code_widget.insertRow(code_widget.rowCount())
             # adding line number
             line_number = QTableWidgetItem(str(i + 1))
             line_number.setTextAlignment(QtCore.Qt.AlignTrailing | QtCore.Qt.AlignTop)
-            self.ui.codeWidget.setItem(i, 0, line_number)
+            code_widget.setItem(i, 0, line_number)
             # adding color
             line_color = QTableWidgetItem()
             line_color.setBackground(QtGui.QColor(100, 100, 150))
-            self.ui.codeWidget.setItem(i, 1, line_color)
+            code_widget.setItem(i, 1, line_color)
             # adding line content
             line_content = QTableWidgetItem(lines[i])
             line_content.setTextAlignment(QtCore.Qt.AlignLeading | QtCore.Qt.AlignTop)
-            self.ui.codeWidget.setItem(i, 2, line_content)
-        self.ui.codeWidget.resizeColumnsToContents()
+            code_widget.setItem(i, 2, line_content)
+        code_widget.resizeColumnsToContents()
         # self.ui.codeWidget.setStyleSheet("""
         #     QTableWidget::item {padding-left: 0px; border: 0px}
         #     """)
         # test - end
 
         # line number
-        line_number = int(self.ui.vioWidget.item(row, 2).text().split(":")[0])
-        self.ui.codeWidget.selectRow(line_number - 1)
-        self.ui.codeWidget.scrollTo(self.ui.codeWidget.model().index(line_number - 1, 1))
+        code_widget.selectRow(show_line - 1)
+        code_widget.scrollTo(code_widget.model().index(show_line - 1, 1))
 
 
     def show_violations(self, violations):
