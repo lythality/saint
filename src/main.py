@@ -49,9 +49,16 @@ class My_MainWindow(QMainWindow):
         file_name = self.ui.vioWidget.item(row, 1).text()
         line_number = int(self.ui.vioWidget.item(row, 2).text().split(":")[0])
 
-        # test - start
         code_str = open(file_name, 'r').read()
         self.show_code_at(self.ui.codeWidget, code_str, line_number)
+        # test - start
+        code_str = code_str.split("\n")
+        del code_str[3]
+        del code_str[4]
+        del code_str[5]
+        code_str = code_str[0:3] + ["AA", "BB", "CC"] + code_str[3:]
+        code_str = "\n".join(code_str)
+        # test - end
         self.show_code_at(self.ui.codeWidgetAfter, code_str, line_number)
 
     def show_code_at(self, code_widget, code_str, show_line):
