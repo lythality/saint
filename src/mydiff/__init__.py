@@ -1,7 +1,7 @@
 import difflib
 
 
-class MyDiferrence:
+class MyDifference:
     def __init__(self):
         self.code_before = ""
         self.code_after = ""
@@ -74,7 +74,7 @@ if __name__ == '__main__':
     str1 = "start\nAAB apple\nAAD\nend"
     str2 = "start\nAAC apple\nAAD\nend"
 
-    for diff in MyDiferrence().get_diff(str1, str2):
+    for diff in MyDifference().get_diff(str1, str2):
         if type(diff) == Common:
             print("COMMON: "+str(diff.codes))
         elif type(diff) == Differ:
