@@ -55,17 +55,22 @@ class My_MainWindow(QMainWindow):
         # self.show_code()
 
     def show_code(self, row, col):
-        file_name = self.ui.vioWidget.item(row, 1).text()
+        orig_file_name = self.ui.vioWidget.item(row, 1).text()
+        fixed_file_name = orig_file_name + "_saved.c"
         line_number = int(self.ui.vioWidget.item(row, 2).text().split(":")[0])
 
-        orig_code = open(file_name, 'r').read()
+        orig_code = open(orig_file_name, 'r').read()
         # test - start
-        fixed_code = orig_code.split("\n")
-        del fixed_code[4]
-        del fixed_code[3]
-        del fixed_code[2]
-        fixed_code = fixed_code[0:6] + ["AA", "BB", "CC"] + fixed_code[6:]
-        fixed_code = "\n".join(fixed_code)
+        from os.path import exists
+        if exists(fixed_file_name):
+            fixed_code = open(fixed_file_name, 'r').read()
+        else:
+            fixed_code = orig_code.split("\n")
+            del fixed_code[4]
+            del fixed_code[3]
+            del fixed_code[2]
+            fixed_code = fixed_code[0:6] + ["AA", "BB", "CC"] + fixed_code[6:]
+            fixed_code = "\n".join(fixed_code)
         # test - end
 
         # diff check
@@ -209,7 +214,6 @@ class My_MainWindow(QMainWindow):
 
 
     def show_violations(self, violations):
-        print("AA")
         for i in range(len(violations)):
             self.ui.vioWidget.insertRow(self.ui.vioWidget.rowCount())
             # adding rule_id
@@ -264,4 +268,4 @@ if __name__ == '__main__':
         # violations = start_saint('../test_res/test_string.c')
         # violations = start_saint('../test_res/test_bitfield.c')
         # violations = start_saint('../test_res/test_value.c')
-        # open_gui(violations)
+        open_gui(violations)
