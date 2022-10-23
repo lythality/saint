@@ -270,7 +270,7 @@ class RuleChecker(SWorkspace):
         for tri in trigraph_strings:
             for s in self.string_literal:
                 if tri in getTokenString(s):
-                    self.add_violation(Violation(4, 2, tri + "in" + getTokenString(s), s.location))
+                    self.add_violation(Violation(4, 2, getTokenString(s), s.location))
 
         # checking rule 6.1 - bit_field_type are restricted
         for n in self.field_decl:

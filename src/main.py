@@ -4,6 +4,8 @@ from rule_checker import RuleChecker
 from mydiff import MyDifference
 from mydiff import Common, Differ
 
+from fixer import Fixer
+
 with_gui = False
 
 def start_saint(srcfile: str):
@@ -14,6 +16,10 @@ def start_saint(srcfile: str):
     trav.print_violations()
     # for f in trav.function:
     #     print(f.get_control_flow_graph_info())
+
+    fixer = Fixer()
+    for vio in trav.violations:
+        fixer.fix(vio)
     return trav.violations
 
 
@@ -228,6 +234,12 @@ class My_MainWindow(QMainWindow):
 
 # the main function
 if __name__ == '__main__':
+    # remove former processed result
+    from os import listdir
+    from os import remove
+    for f in list(filter(lambda f: str(f).endswith("_saved.c"), listdir('../test_res/'))):
+        remove('../test_res/' + f)
+
     # process files in argv
     if len(argv) > 1:
         for arg in argv[1:]:
@@ -252,4 +264,4 @@ if __name__ == '__main__':
         # violations = start_saint('../test_res/test_string.c')
         # violations = start_saint('../test_res/test_bitfield.c')
         # violations = start_saint('../test_res/test_value.c')
-        open_gui(violations)
+        # open_gui(violations)
