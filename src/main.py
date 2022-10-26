@@ -123,6 +123,8 @@ class My_MainWindow(QMainWindow):
                 # adding line number
                 line_number = QTableWidgetItem(str(line_num))
                 line_number.setTextAlignment(QtCore.Qt.AlignTrailing | QtCore.Qt.AlignTop)
+                if type(diff) == Differ:
+                    line_number.setBackground(QtGui.QColor(255, 200, 200))
                 code_widget.setItem(code_widget.rowCount()-1, 0, line_number)
                 # adding color
                 line_color = QTableWidgetItem()
@@ -134,6 +136,8 @@ class My_MainWindow(QMainWindow):
                 # adding line content
                 line_content = QTableWidgetItem(line)
                 line_content.setTextAlignment(QtCore.Qt.AlignLeading | QtCore.Qt.AlignTop)
+                if type(diff) == Differ:
+                    line_content.setBackground(QtGui.QColor(255, 200, 200))
                 code_widget.setItem(code_widget.rowCount()-1, 2, line_content)
 
                 line_num += 1
@@ -171,6 +175,8 @@ class My_MainWindow(QMainWindow):
                 # adding line number
                 line_number = QTableWidgetItem(str(line_num))
                 line_number.setTextAlignment(QtCore.Qt.AlignTrailing | QtCore.Qt.AlignTop)
+                if type(diff) == Differ:
+                    line_number.setBackground(QtGui.QColor(200, 255, 200))
                 code_widget.setItem(code_widget.rowCount()-1, 0, line_number)
                 # adding color
                 line_color = QTableWidgetItem()
@@ -182,6 +188,8 @@ class My_MainWindow(QMainWindow):
                 # adding line content
                 line_content = QTableWidgetItem(line)
                 line_content.setTextAlignment(QtCore.Qt.AlignLeading | QtCore.Qt.AlignTop)
+                if type(diff) == Differ:
+                    line_content.setBackground(QtGui.QColor(200, 255, 200))
                 code_widget.setItem(code_widget.rowCount()-1, 2, line_content)
 
                 line_num += 1
