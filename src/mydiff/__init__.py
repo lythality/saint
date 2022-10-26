@@ -13,7 +13,7 @@ class MyDifference:
         self.diff_record.clear()
 
         curr_record = None
-        for diff in difflib.unified_diff(self.code_before.split("\n"), self.code_after.split("\n"), lineterm=""):
+        for diff in difflib.unified_diff(self.code_before.split("\n"), self.code_after.split("\n"), n=9999999, lineterm=""):
             if diff.startswith("---") or diff.startswith("+++") or diff.startswith("@@"):
                 pass
             elif diff.startswith(" "):
