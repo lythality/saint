@@ -23,7 +23,7 @@ def start_saint(srcfile: str):
     return trav.violations
 
 
-from PyQt5.QtWidgets import QApplication, QMainWindow, QTableWidgetItem
+from PyQt5.QtWidgets import QApplication, QMainWindow, QTableWidgetItem, QScrollBar
 from PyQt5 import QtCore
 
 import sys
@@ -54,9 +54,22 @@ class My_MainWindow(QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
 
+        # additional task: synchronized codeview scroll
+        self.sync_codeview_scroll()
+
     def button_clicked(self):
         print("pressed")
         # self.show_code()
+
+    def set_codeview_scroll(self, value):
+        self.ui.codeWidget.verticalScrollBar().setValue(value)
+
+    def set_codeviewafter_scroll(self, value):
+        self.ui.codeWidgetAfter.verticalScrollBar().setValue(value)
+
+    def sync_codeview_scroll(self):
+        self.ui.codeWidget.verticalScrollBar().valueChanged.connect(self.set_codeviewafter_scroll)
+        self.ui.codeWidgetAfter.verticalScrollBar().valueChanged.connect(self.set_codeview_scroll)
 
     def show_code(self, row, col):
         orig_file_name = self.ui.vioWidget.item(row, 1).text()
