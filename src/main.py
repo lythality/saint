@@ -36,6 +36,10 @@ def open_gui(violations=[]):
     app = QtWidgets.QApplication(sys.argv)
     MainWindow = My_MainWindow()
 
+    # setting style
+    app.setStyle('Fusion')
+    print(QtWidgets.QStyleFactory.keys())
+
     # set violations
     MainWindow.show_violations(violations)
 
