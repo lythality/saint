@@ -1,11 +1,9 @@
 from PyQt5 import QtCore, QtGui
 from PyQt5.QtWidgets import QMainWindow, QTableWidgetItem
 
-from ui.UI_MainWindow import UI_MainWindow
-
-from mydiff import MyDifference
 from mydiff import Common, Differ
-
+from mydiff import MyDifference
+from ui.UI_MainWindow import UI_MainWindow
 
 COMMON = QtGui.QColor(100, 100, 150)
 HARD_GREEN = QtGui.QColor(0, 250, 0)
@@ -98,25 +96,25 @@ class MainWindow(QMainWindow):
                 line_number.setTextAlignment(QtCore.Qt.AlignTrailing | QtCore.Qt.AlignTop)
                 if type(diff) == Differ:
                     line_number.setBackground(LIGHT_RED)
-                code_widget.setItem(code_widget.rowCount()-1, 0, line_number)
+                code_widget.setItem(code_widget.rowCount() - 1, 0, line_number)
                 # adding color
                 line_color = QTableWidgetItem()
                 if type(diff) == Differ:
                     line_color.setBackground(HARD_RED)
                 else:
                     line_color.setBackground(COMMON)
-                code_widget.setItem(code_widget.rowCount()-1, 1, line_color)
+                code_widget.setItem(code_widget.rowCount() - 1, 1, line_color)
                 # adding line content
                 line_content = QTableWidgetItem(line)
                 line_content.setTextAlignment(QtCore.Qt.AlignLeading | QtCore.Qt.AlignTop)
                 if type(diff) == Differ:
                     line_content.setBackground(LIGHT_RED)
-                code_widget.setItem(code_widget.rowCount()-1, 2, line_content)
+                code_widget.setItem(code_widget.rowCount() - 1, 2, line_content)
 
                 line_num += 1
 
             if type(diff) == Differ:
-                for _ in range(diff.size-len(diff.deletion)):
+                for _ in range(diff.size - len(diff.deletion)):
                     code_widget.insertRow(code_widget.rowCount())
 
         code_widget.resizeColumnsToContents()
@@ -146,25 +144,25 @@ class MainWindow(QMainWindow):
                 line_number.setTextAlignment(QtCore.Qt.AlignTrailing | QtCore.Qt.AlignTop)
                 if type(diff) == Differ:
                     line_number.setBackground(LIGHT_GREEN)
-                code_widget.setItem(code_widget.rowCount()-1, 0, line_number)
+                code_widget.setItem(code_widget.rowCount() - 1, 0, line_number)
                 # adding color
                 line_color = QTableWidgetItem()
                 if type(diff) == Differ:
                     line_color.setBackground(HARD_GREEN)
                 else:
                     line_color.setBackground(COMMON)
-                code_widget.setItem(code_widget.rowCount()-1, 1, line_color)
+                code_widget.setItem(code_widget.rowCount() - 1, 1, line_color)
                 # adding line content
                 line_content = QTableWidgetItem(line)
                 line_content.setTextAlignment(QtCore.Qt.AlignLeading | QtCore.Qt.AlignTop)
                 if type(diff) == Differ:
                     line_content.setBackground(LIGHT_GREEN)
-                code_widget.setItem(code_widget.rowCount()-1, 2, line_content)
+                code_widget.setItem(code_widget.rowCount() - 1, 2, line_content)
 
                 line_num += 1
 
             if type(diff) == Differ:
-                for _ in range(diff.size-len(diff.addition)):
+                for _ in range(diff.size - len(diff.addition)):
                     code_widget.insertRow(code_widget.rowCount())
 
         code_widget.resizeColumnsToContents()
@@ -183,22 +181,21 @@ class MainWindow(QMainWindow):
             # adding line number
             line_number = QTableWidgetItem(str(code_widget.rowCount()))
             line_number.setTextAlignment(QtCore.Qt.AlignTrailing | QtCore.Qt.AlignTop)
-            code_widget.setItem(code_widget.rowCount()-1, 0, line_number)
+            code_widget.setItem(code_widget.rowCount() - 1, 0, line_number)
             # adding color
             line_color = QTableWidgetItem()
             line_color.setBackground(QtGui.QColor(100, 100, 150))
-            code_widget.setItem(code_widget.rowCount()-1, 1, line_color)
+            code_widget.setItem(code_widget.rowCount() - 1, 1, line_color)
             # adding line content
-            line_content = QTableWidgetItem(lines[code_widget.rowCount()-1])
+            line_content = QTableWidgetItem(lines[code_widget.rowCount() - 1])
             line_content.setTextAlignment(QtCore.Qt.AlignLeading | QtCore.Qt.AlignTop)
-            code_widget.setItem(code_widget.rowCount()-1, 2, line_content)
+            code_widget.setItem(code_widget.rowCount() - 1, 2, line_content)
 
         code_widget.resizeColumnsToContents()
 
         # line number
         code_widget.selectRow(show_line - 1)
         code_widget.scrollTo(code_widget.model().index(show_line - 1, 1))
-
 
     def show_violations(self, violations):
         for i in range(len(violations)):

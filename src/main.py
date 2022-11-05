@@ -1,11 +1,11 @@
 from sys import argv
-from rule_checker import RuleChecker
 
 from fixer import Fixer
-
+from rule_checker import RuleChecker
 from ui import open_gui
 
 with_gui = False
+
 
 def start_saint(srcfile: str):
     trav = RuleChecker()
@@ -21,11 +21,13 @@ def start_saint(srcfile: str):
         fixer.fix(vio)
     return trav.violations
 
+
 # the main function
 if __name__ == '__main__':
     # remove former processed result
     from os import listdir
     from os import remove
+
     for f in list(filter(lambda f: str(f).endswith("_saved.c"), listdir('../test_res/'))):
         remove('../test_res/' + f)
 

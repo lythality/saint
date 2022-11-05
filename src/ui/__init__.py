@@ -5,6 +5,7 @@ from PyQt5 import QtWidgets
 from ui.MainWindow import MainWindow
 from ui.UI_MainWindow import UI_MainWindow
 
+
 def open_gui(violations=[]):
     # basic gui open - start
     app = QtWidgets.QApplication(sys.argv)
@@ -12,7 +13,6 @@ def open_gui(violations=[]):
 
     # setting style
     app.setStyle('Fusion')
-    print(QtWidgets.QStyleFactory.keys())
 
     # set violations
     main_window.show_violations(violations)
