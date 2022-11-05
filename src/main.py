@@ -23,7 +23,7 @@ def start_saint(srcfile: str):
     return trav.violations
 
 
-from PyQt5.QtWidgets import QApplication, QMainWindow, QTableWidgetItem, QScrollBar
+from PyQt5.QtWidgets import QMainWindow, QTableWidgetItem
 from PyQt5 import QtCore
 
 import sys
@@ -47,6 +47,12 @@ def open_gui(violations=[]):
     MainWindow.show()
     app.exec_()
 
+COMMON = QtGui.QColor(100, 100, 150)
+HARD_GREEN = QtGui.QColor(0, 250, 0)
+LIGHT_GREEN = QtGui.QColor(200, 255, 200)
+HARD_RED = QtGui.QColor(250, 0, 0)
+LIGHT_RED = QtGui.QColor(255, 200, 200)
+
 
 class My_MainWindow(QMainWindow):
     def __init__(self):
@@ -54,60 +60,42 @@ class My_MainWindow(QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
 
-        # additional task: synchronized codeview scroll
-        self.sync_codeview_scroll()
+        # codeview scroll synchronized
+        self.ui.codeWidgetLeft.verticalScrollBar().valueChanged.connect(self.__set_codeviewright_scroll)
+        self.ui.codeWidgetRight.verticalScrollBar().valueChanged.connect(self.__set_codeviewleft_scroll)
 
+    # for test purpose
     def button_clicked(self):
         print("pressed")
-        # self.show_code()
 
-    def set_codeview_scroll(self, value):
-        self.ui.codeWidget.verticalScrollBar().setValue(value)
+    def __set_codeviewleft_scroll(self, value):
+        self.ui.codeWidgetLeft.verticalScrollBar().setValue(value)
 
-    def set_codeviewafter_scroll(self, value):
-        self.ui.codeWidgetAfter.verticalScrollBar().setValue(value)
+    def __set_codeviewright_scroll(self, value):
+        self.ui.codeWidgetRight.verticalScrollBar().setValue(value)
 
-    def sync_codeview_scroll(self):
-        self.ui.codeWidget.verticalScrollBar().valueChanged.connect(self.set_codeviewafter_scroll)
-        self.ui.codeWidgetAfter.verticalScrollBar().valueChanged.connect(self.set_codeview_scroll)
-
-    def show_code(self, row, col):
+    # called by UI
+    # row is violation row
+    def show_code(self, row, __unused):
+        # getting file name and show line num
         orig_file_name = self.ui.vioWidget.item(row, 1).text()
         fixed_file_name = orig_file_name + "_saved.c"
         line_number = int(self.ui.vioWidget.item(row, 2).text().split(":")[0])
 
+        # get code text
         orig_code = open(orig_file_name, 'r').read()
-        # test - start
-        # from os.path import exists
-        # if exists(fixed_file_name):
         fixed_code = open(fixed_file_name, 'r').read()
-        # else:
-        #     fixed_code = orig_code.split("\n")
-        #     # del fixed_code[4]
-        #     # del fixed_code[3]
-        #     # del fixed_code[2]
-        #     fixed_code = fixed_code[0:6] + ["AA", "BB", "CC"] + fixed_code[6:]
-        #     fixed_code = "\n".join(fixed_code)
-        # test - end
 
-        # diff check
+        # diff check of the code text
         diff_record = MyDifference().get_diff(orig_code, fixed_code)
-        for diff in diff_record:
-            if type(diff) == Common:
-                print("COMMON: " + str(diff.codes))
-            elif type(diff) == Differ:
-                print(" SIZE : " + str(diff.size))
-                print("DELETE: " + str(diff.deletion))
-                print("APPEND: " + str(diff.addition))
-        print(diff_record)
 
-        # show it
+        # show it to the widget
         if diff_record:
-            self.show_code_deletion(self.ui.codeWidget, diff_record, line_number)
-            self.show_code_addition(self.ui.codeWidgetAfter, diff_record, line_number)
+            self.show_code_deletion(self.ui.codeWidgetLeft, diff_record, line_number)
+            self.show_code_addition(self.ui.codeWidgetRight, diff_record, line_number)
         else:
-            self.show_code_itself(self.ui.codeWidget, orig_code)
-            self.show_code_itself(self.ui.codeWidgetAfter, fixed_code)
+            self.show_code_itself(self.ui.codeWidgetLeft, orig_code)
+            self.show_code_itself(self.ui.codeWidgetRight, fixed_code)
 
     def show_code_itself(self, code_widget, code_text):
         line_num = 1
@@ -131,13 +119,12 @@ class My_MainWindow(QMainWindow):
         code_widget.resizeColumnsToContents()
 
     def show_code_deletion(self, code_widget, diff_record, show_line):
-        # test - start
+        # Remove all lines
         while code_widget.rowCount() > 0:
             code_widget.removeRow(0)
 
         line_num = 1
         for diff in diff_record:
-
             if type(diff) == Common:
                 contents = diff.codes
             else:
@@ -150,20 +137,20 @@ class My_MainWindow(QMainWindow):
                 line_number = QTableWidgetItem(str(line_num))
                 line_number.setTextAlignment(QtCore.Qt.AlignTrailing | QtCore.Qt.AlignTop)
                 if type(diff) == Differ:
-                    line_number.setBackground(QtGui.QColor(255, 200, 200))
+                    line_number.setBackground(LIGHT_RED)
                 code_widget.setItem(code_widget.rowCount()-1, 0, line_number)
                 # adding color
                 line_color = QTableWidgetItem()
-                if type(diff) == Common:
-                    line_color.setBackground(QtGui.QColor(100, 100, 150))
+                if type(diff) == Differ:
+                    line_color.setBackground(HARD_RED)
                 else:
-                    line_color.setBackground(QtGui.QColor(250, 0, 0))
+                    line_color.setBackground(COMMON)
                 code_widget.setItem(code_widget.rowCount()-1, 1, line_color)
                 # adding line content
                 line_content = QTableWidgetItem(line)
                 line_content.setTextAlignment(QtCore.Qt.AlignLeading | QtCore.Qt.AlignTop)
                 if type(diff) == Differ:
-                    line_content.setBackground(QtGui.QColor(255, 200, 200))
+                    line_content.setBackground(LIGHT_RED)
                 code_widget.setItem(code_widget.rowCount()-1, 2, line_content)
 
                 line_num += 1
@@ -173,17 +160,13 @@ class My_MainWindow(QMainWindow):
                     code_widget.insertRow(code_widget.rowCount())
 
         code_widget.resizeColumnsToContents()
-        # self.ui.codeWidget.setStyleSheet("""
-        #     QTableWidget::item {padding-left: 0px; border: 0px}
-        #     """)
-        # test - end
 
         # line number
         code_widget.selectRow(show_line - 1)
         code_widget.scrollTo(code_widget.model().index(show_line - 1, 1))
 
     def show_code_addition(self, code_widget, diff_record, show_line):
-        # test - start
+        # Remove all lines
         while code_widget.rowCount() > 0:
             code_widget.removeRow(0)
 
@@ -202,20 +185,20 @@ class My_MainWindow(QMainWindow):
                 line_number = QTableWidgetItem(str(line_num))
                 line_number.setTextAlignment(QtCore.Qt.AlignTrailing | QtCore.Qt.AlignTop)
                 if type(diff) == Differ:
-                    line_number.setBackground(QtGui.QColor(200, 255, 200))
+                    line_number.setBackground(LIGHT_GREEN)
                 code_widget.setItem(code_widget.rowCount()-1, 0, line_number)
                 # adding color
                 line_color = QTableWidgetItem()
-                if type(diff) == Common:
-                    line_color.setBackground(QtGui.QColor(100, 100, 150))
+                if type(diff) == Differ:
+                    line_color.setBackground(HARD_GREEN)
                 else:
-                    line_color.setBackground(QtGui.QColor(0, 250, 0))
+                    line_color.setBackground(COMMON)
                 code_widget.setItem(code_widget.rowCount()-1, 1, line_color)
                 # adding line content
                 line_content = QTableWidgetItem(line)
                 line_content.setTextAlignment(QtCore.Qt.AlignLeading | QtCore.Qt.AlignTop)
                 if type(diff) == Differ:
-                    line_content.setBackground(QtGui.QColor(200, 255, 200))
+                    line_content.setBackground(LIGHT_GREEN)
                 code_widget.setItem(code_widget.rowCount()-1, 2, line_content)
 
                 line_num += 1
@@ -225,10 +208,6 @@ class My_MainWindow(QMainWindow):
                     code_widget.insertRow(code_widget.rowCount())
 
         code_widget.resizeColumnsToContents()
-        # self.ui.codeWidget.setStyleSheet("""
-        #     QTableWidget::item {padding-left: 0px; border: 0px}
-        #     """)
-        # test - end
 
         # line number
         code_widget.selectRow(show_line - 1)
@@ -253,11 +232,8 @@ class My_MainWindow(QMainWindow):
             line_content = QTableWidgetItem(lines[code_widget.rowCount()-1])
             line_content.setTextAlignment(QtCore.Qt.AlignLeading | QtCore.Qt.AlignTop)
             code_widget.setItem(code_widget.rowCount()-1, 2, line_content)
+
         code_widget.resizeColumnsToContents()
-        # self.ui.codeWidget.setStyleSheet("""
-        #     QTableWidget::item {padding-left: 0px; border: 0px}
-        #     """)
-        # test - end
 
         # line number
         code_widget.selectRow(show_line - 1)
