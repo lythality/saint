@@ -78,16 +78,16 @@ class My_MainWindow(QMainWindow):
 
         orig_code = open(orig_file_name, 'r').read()
         # test - start
-        from os.path import exists
-        if exists(fixed_file_name):
-            fixed_code = open(fixed_file_name, 'r').read()
-        else:
-            fixed_code = orig_code.split("\n")
-            del fixed_code[4]
-            del fixed_code[3]
-            del fixed_code[2]
-            fixed_code = fixed_code[0:6] + ["AA", "BB", "CC"] + fixed_code[6:]
-            fixed_code = "\n".join(fixed_code)
+        # from os.path import exists
+        # if exists(fixed_file_name):
+        fixed_code = open(fixed_file_name, 'r').read()
+        # else:
+        #     fixed_code = orig_code.split("\n")
+        #     # del fixed_code[4]
+        #     # del fixed_code[3]
+        #     # del fixed_code[2]
+        #     fixed_code = fixed_code[0:6] + ["AA", "BB", "CC"] + fixed_code[6:]
+        #     fixed_code = "\n".join(fixed_code)
         # test - end
 
         # diff check
@@ -99,10 +99,36 @@ class My_MainWindow(QMainWindow):
                 print(" SIZE : " + str(diff.size))
                 print("DELETE: " + str(diff.deletion))
                 print("APPEND: " + str(diff.addition))
+        print(diff_record)
 
         # show it
-        self.show_code_deletion(self.ui.codeWidget, diff_record, line_number)
-        self.show_code_addition(self.ui.codeWidgetAfter, diff_record, line_number)
+        if diff_record:
+            self.show_code_deletion(self.ui.codeWidget, diff_record, line_number)
+            self.show_code_addition(self.ui.codeWidgetAfter, diff_record, line_number)
+        else:
+            self.show_code_itself(self.ui.codeWidget, orig_code)
+            self.show_code_itself(self.ui.codeWidgetAfter, fixed_code)
+
+    def show_code_itself(self, code_widget, code_text):
+        line_num = 1
+        for line in code_text.split("\n"):
+            # insert row
+            code_widget.insertRow(code_widget.rowCount())
+            # adding line number
+            line_number = QTableWidgetItem(str(line_num))
+            line_number.setTextAlignment(QtCore.Qt.AlignTrailing | QtCore.Qt.AlignTop)
+            code_widget.setItem(code_widget.rowCount() - 1, 0, line_number)
+            # adding color
+            line_color = QTableWidgetItem()
+            code_widget.setItem(code_widget.rowCount() - 1, 1, line_color)
+            # adding line content
+            line_content = QTableWidgetItem(line)
+            line_content.setTextAlignment(QtCore.Qt.AlignLeading | QtCore.Qt.AlignTop)
+            code_widget.setItem(code_widget.rowCount() - 1, 2, line_content)
+
+            line_num += 1
+
+        code_widget.resizeColumnsToContents()
 
     def show_code_deletion(self, code_widget, diff_record, show_line):
         # test - start
@@ -282,7 +308,7 @@ if __name__ == '__main__':
         # violations = start_saint('../test_res/test_cfg.c')
         # violations = start_saint('../test_res/test_comments.c')
         # violations = start_saint('../test_res/test_control.c')
-        violations = start_saint('../test_res/test_expr.c')
+        # violations = start_saint('../test_res/test_expr.c')
         # violations = start_saint('../test_res/test_goto_15_1.c')
         # violations = start_saint('../test_res/test_goto_15_3.c')
         # violations = start_saint('../test_res/test_func_decl.c')
@@ -292,5 +318,5 @@ if __name__ == '__main__':
         # violations = start_saint('../test_res/test_typedef.c')
         # violations = start_saint('../test_res/test_string.c')
         # violations = start_saint('../test_res/test_bitfield.c')
-        # violations = start_saint('../test_res/test_value.c')
+        violations = start_saint('../test_res/test_value.c')
         open_gui(violations)
